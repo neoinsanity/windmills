@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+import sys
+from scaffold import Scaffold
 from zmq import Context, PUB, RCVMORE, SNDMORE, SUB, SUBSCRIBE
-from windmills.conerstone import CornerStone
 
 
 __author__ = 'neoinsanity'
@@ -8,7 +9,7 @@ __author__ = 'neoinsanity'
 # proxy-windmill
 #
 
-class ProxyWindmill(CornerStone):
+class ProxyWindmill(Scaffold):
     """
     >>> from threading import Thread
     >>> import time
@@ -24,8 +25,8 @@ class ProxyWindmill(CornerStone):
     """
 
 
-    def __init__(self):
-        super(ProxyWindmill, self).__init__()
+    def __init__(self, **kwargs):
+        Scaffold.__init__(self)
 
         input_sock_type = SUB
         input_sock_url = 'tcp://localhost:6667'
@@ -52,5 +53,6 @@ class ProxyWindmill(CornerStone):
 
 
 if __name__ == "__main__":
-    proxyWindmill = ProxyWindmill()
+    argv = sys.argv
+    proxyWindmill = ProxyWindmill(argv=argv)
     proxyWindmill.run()
