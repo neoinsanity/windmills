@@ -11,8 +11,19 @@ class Miller(object):
         This method will create a property bag that can be used to assign
         attributes.
 
-        Return:
-        >>>
+        Return: An empty class object for assigning properties.
+
+        It is not valid to create a python instance of object() for use as a
+        property bag. The underlying reason, is that there is no __dict__
+        property assigned to an instance of object - hence the inability for
+        an object to hold a attribute assignment.
+
+        Example usage:
+        >>> foo = Miller()
+        >>> property_bag = foo.__create_property_bag__()
+        >>> assert property_bag
+        >>> property_bag.some_attr = 5
+        >>> assert property_bag.some_attr == 5
         """
         return type('_property_bag', (object,), dict())
 
