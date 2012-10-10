@@ -46,5 +46,6 @@ class Scaffold(Cornerstone):
         self.__invoke_method_on_bases__(func_name='configuration_options',
                                      arg_parser=self._arg_parser)
         self._args = self._arg_parser.parse_args(argv)
+        #todo: raul - iterate over args attrs to set on self
         self.__invoke_method_on_bases__(func_name='configure',
                                      args=self._args)
