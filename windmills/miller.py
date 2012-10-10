@@ -6,6 +6,17 @@ class Miller(object):
     """This is a a mix-in helper library."""
 
 
+    def __create_property_bag__(self):
+        """
+        This method will create a property bag that can be used to assign
+        attributes.
+
+        Return:
+        >>>
+        """
+        return type('_property_bag', (object,), dict())
+
+
     def __invoke_method_on_bases__(self, func_name=None, *args, **kwargs):
         """
         This helper method will walk the base class hierarchy to invoke a
@@ -21,7 +32,7 @@ class Miller(object):
         Return: None
 
         Raises:
-        ValueError: Required func_name parameter not provided.
+        ValueError: __invoke_method_on_bases__-func_name parameter required
 
         To utilize this method, a function name must be provided. Failure to
         do so will result in an exception being thrown.
@@ -68,3 +79,4 @@ class Miller(object):
                 func = getattr(base, func_name)
                 func(self, *args, **kwargs)
             base = base.__base__ # iterate to the next base class
+
