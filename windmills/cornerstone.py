@@ -1,8 +1,20 @@
+"""
+Cornerstone provides a 0mq core that consists of an input, output,
+and control socket.
+
+
+
+Configuration options provided by the Cornerstone class.
+    optional arguments:
+        --heartbeat HEARTBEAT
+            Set the heartbeat rete in seconds of the core 0mq poller.
+        --verbose
+            Enable verbose log output. Useful for debugging.
+"""
 import signal
 import sys
-from zmq import Context, Poller, POLLIN, RCVMORE, SNDMORE
-from zmq.core.error import ZMQError
 from miller import Miller
+from zmq import Context, Poller, POLLIN, RCVMORE, SNDMORE, ZMQError
 
 
 __author__ = 'neoinsanity'
@@ -10,6 +22,7 @@ __author__ = 'neoinsanity'
 
 class Cornerstone(Miller):
     """
+    Cornerstone is
     >>> import threading
     >>> import time
     >>> from zmq import Context, SUB, SUBSCRIBE
@@ -18,8 +31,9 @@ class Cornerstone(Miller):
     >>> t.start()
     >>> time.sleep(3)
     >>> foo.kill()
-    >>> t.join(6)
+    >>> t.join(1)
     Stop flag triggered ... shutting down.
+    >>> assert not t.is_alive()
     >>> # socket to receive control messages on
     >>> ctx = foo.zmq_ctx
     >>> sock = ctx.socket(SUB)
@@ -30,8 +44,9 @@ class Cornerstone(Miller):
     >>> t.start()
     >>> time.sleep(3)
     >>> foo.kill()
-    >>> t.join(3)
+    >>> t.join(1)
     Stop flag triggered ... shutting down.
+    >>> assert not t.is_alive()
     """
 
 
@@ -62,7 +77,22 @@ class Cornerstone(Miller):
 
 
     def configuration_options(self, arg_parser=None):
+        """
+        The configuration_options method utilizes the arg_parser parameter to
+        add arguments that should be handled during configuration.
+
+        Keyword Arguments:
+        arg_parser - argparse.ArgumentParser object.
+
+        >>> import argparse
+        >>> parser = argparse.ArgumentParser(prog='app.py')
+        >>> foo = Cornerstone()
+        >>> foo.configuration_options(arg_parser=parser)
+        >>> args = parser.print_usage()
+        usage: app.py [-h] [--heartbeat HEARTBEAT] [--verbose]
+        """
         assert arg_parser
+
         arg_parser.add_argument('--heartbeat',
                                 type=int,
                                 default=3,
@@ -75,17 +105,37 @@ class Cornerstone(Miller):
 
 
     def configure(self, args=None):
+        """
+        The configure method configures a Cornerstone instance by
+        prior to the invocation of start.
+
+        >>> foo = Cornerstone()
+        >>> args = foo.__create_property_bag__()
+        >>> args.heartbeat = 5
+        >>> args.verbose = True
+        >>> foo.configure(args=args)
+        >>> assert foo.heartbeat == 5
+        >>> assert foo.verbose == True
+        """
         self.heartbeat = args.heartbeat
         self.verbose = args.verbose
 
 
     def register_input_sock(self, sock):
         """
-        This method will register the input socket. It will only allow for a
-        single input socket to be registered with any given instance. If an
-        existing socket is registered, it will be replaced with the given sock
-        parameter.
+        Register a given input socket as the ingest point for a Cornerstone
+        instance.
 
+        Keyward Arguments:
+        sock - the input socket that is to be registered.
+
+        Return: None
+
+        Cornerstone does not support multiple input sockets, so any currently
+        registered input socket will be discarded. This is a per instance
+        limitation, in which case the primary concern is ipaddress collision.
+
+        Example Usage:
         >>> from zmq import SUB, SUBSCRIBE
         >>> foo = Cornerstone()
         >>> ctx = foo.zmq_ctx
@@ -113,11 +163,20 @@ class Cornerstone(Miller):
 
     def register_output_sock(self, sock):
         """
-        This method will register the output socket. It will only allow for a
-        single output socket to be registered for any given instance. If an
-        existing socket is registered, it will be replaced with the given
-        socket for output handling.
+        Register a given output socket as the egress point for a Cornerstone
+        instance.
 
+        Keyward Arguments:
+        sock - the output socket that is to be registered.
+
+        Return: none
+
+        Cornerstone does not support multiple output sockets,
+        so any currently registered output socket will be discarded. This is
+        a per instance limitation. In which case the primary concern is
+        ipaddress collision.
+
+        Example Usage:
         >>> from zmq import PUB
         >>> foo = Cornerstone()
         >>> ctx = foo.zmq_ctx
