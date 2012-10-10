@@ -57,6 +57,9 @@ class Cornerstone(Miller):
         # construct the poller
         self._poll = Poller()
 
+        # verbose level is off by default
+        self.verbose = False
+
 
     def configuration_options(self, arg_parser=None):
         assert arg_parser
@@ -65,10 +68,15 @@ class Cornerstone(Miller):
                                 default=3,
                                 help="Set the heartbeat rete in seconds of "
                                      "the core 0mq poller.")
+        arg_parser.add_argument('--verbose',
+                                action="store_true",
+                                help='Enable verbose log output. Useful for '
+                                     'debugging.')
 
 
     def configure(self, args=None):
-        self.heartbeat = args.heartbeat;
+        self.heartbeat = args.heartbeat
+        self.verbose = args.verbose
 
 
     def register_input_sock(self, sock):
@@ -132,15 +140,13 @@ class Cornerstone(Miller):
 
 
     def run(self):
-        '''
+        """
         Comment: -- AAA --
         What needs to occur here si to see if there is a 0mq connection
-        configured. If so,
-        then we will simply push to that connector. This will be the default
-        behavior, at least for now.
-        There should be a mechanism for transmitting the data out to a
-        registered handler.
-        '''
+        configured. If so, then we will simply push to that connector. This
+        will be the default behavior, at least for now. There should be a
+        mechanism for transmitting the data out to a registered handler.
+        """
         self._stop = False
 
         tick = 0
@@ -151,12 +157,12 @@ class Cornerstone(Miller):
                 if ze.errno == 4:
                     print 'System interrupt call detected.'
                 else: # exit hard on unhandled exceptions
-                    print 'Unhandled exception in run execution:', ze.errno,\
-                    '-', ze.strerror
+                    print ('Unhandled exception in run execution:', ze.errno,
+                           '-', ze.strerror)
                     exit(-1)
 
             if self._input_sock and socks.get(self._input_sock) == POLLIN:
-                #todo: raul - this whold section needs to be redone,
+                #todo: raul - this whole section needs to be redone,
                 # see additional comment AAA above.
                 msg = self._input_sock.recv()
                 more = self._input_sock.getsockopt(RCVMORE)

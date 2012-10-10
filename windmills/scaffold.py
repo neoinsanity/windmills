@@ -43,8 +43,8 @@ class Scaffold(Cornerstone):
             argv.pop(0)
 
         self._arg_parser = argparse.ArgumentParser()
-        self._invoke_method_on_bases(func_name='configuration_options',
+        self.__invoke_method_on_bases__(func_name='configuration_options',
                                      arg_parser=self._arg_parser)
         self._args = self._arg_parser.parse_args(argv)
-        self._invoke_method_on_bases(func_name='configure',
+        self.__invoke_method_on_bases__(func_name='configure',
                                      args=self._args)
