@@ -1,4 +1,5 @@
 import signal
+import sys
 from zmq import Context, Poller, POLLIN, RCVMORE, SNDMORE
 from zmq.core.error import ZMQError
 from miller import Miller
@@ -20,15 +21,16 @@ class Cornerstone(Miller):
     >>> t.join(6)
     Stop flag triggered ... shutting down.
     >>> # socket to receive control messages on
-    >>> context = Context()
-    >>> foo._control_sock = context.socket(SUB)
-    >>> foo._control_sock.connect('tcp://localhost:6670')
-    >>> foo._control_sock.setsockopt(SUBSCRIBE, "")
+    >>> ctx = foo.zmq_ctx
+    >>> sock = ctx.socket(SUB)
+    >>> sock.connect('tcp://localhost:6670')
+    >>> sock.setsockopt(SUBSCRIBE, "")
+    >>> foo.register_input_sock(sock)
     >>> t = threading.Thread(target=foo.run)
     >>> t.start()
     >>> time.sleep(3)
     >>> foo.kill()
-    >>> t.join(6)
+    >>> t.join(3)
     Stop flag triggered ... shutting down.
     """
 
@@ -60,9 +62,9 @@ class Cornerstone(Miller):
         assert arg_parser
         arg_parser.add_argument('--heartbeat',
                                 type=int,
+                                default=3,
                                 help="Set the heartbeat rete in seconds of "
-                                     "the core 0mq poller.",
-                                default=3)
+                                     "the core 0mq poller.")
 
 
     def configure(self, args=None):
@@ -72,9 +74,8 @@ class Cornerstone(Miller):
     def register_input_sock(self, sock):
         """
         This method will register the input socket. It will only allow for a
-        single input socket to be registered
-        with any given instance. If an existing socket is registered,
-        it will be replaced with the given sock
+        single input socket to be registered with any given instance. If an
+        existing socket is registered, it will be replaced with the given sock
         parameter.
 
         >>> from zmq import SUB, SUBSCRIBE
@@ -99,16 +100,15 @@ class Cornerstone(Miller):
             self._input_sock = None
 
         self._input_sock = sock
-        self._poll.register(sock)
+        self._poll.register(self._input_sock, POLLIN)
 
 
     def register_output_sock(self, sock):
         """
         This method will register the output socket. It will only allow for a
-         single output socket to be registered
-        for any given instance. If an existing socket is registered,
-        it will be replaced,
-        with the given sock parameter.
+        single output socket to be registered for any given instance. If an
+        existing socket is registered, it will be replaced with the given
+        socket for output handling.
 
         >>> from zmq import PUB
         >>> foo = Cornerstone()
@@ -128,6 +128,7 @@ class Cornerstone(Miller):
             self._output_sock = None
 
         self._output_sock = sock
+        self._poll.register(self._control_sock, POLLIN)
 
 
     def run(self):
@@ -142,12 +143,7 @@ class Cornerstone(Miller):
         '''
         self._stop = False
 
-        if self._input_sock:
-            self._poll.register(self._input_sock, POLLIN)
-
-        if self._control_sock:
-            self._poll.register(self._control_sock, POLLIN)
-
+        tick = 0
         while True:
             try:
                 socks = dict(self._poll.poll(timeout=self.heartbeat))
@@ -168,6 +164,10 @@ class Cornerstone(Miller):
                     self._output_sock.send(msg, SNDMORE)
                 else:
                     self._output_sock.send(msg)
+                tick += 1
+                if(tick % 100) == 0:
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
 
             if self._control_sock and socks.get(self._control_sock) == POLLIN:
                 msg = self._control_sock.recv()
@@ -190,8 +190,8 @@ class Cornerstone(Miller):
     def _signal_interrupt_handler(self, signum, frame):
         """
         This method is registered with the signal library to ensure handling
-        of system interrupts. Initialization of
-        this method is performed during __init__ invocation.
+        of system interrupts. Initialization of this method is performed
+        during __init__ invocation.
         """
         self.kill()
 
@@ -199,7 +199,6 @@ class Cornerstone(Miller):
     def _default_command_handler(self, msg):
         """
         This method is the default command channel message handler. It simply
-         invokes a kill flag for any message
-        received.
+        invokes a kill flag for any message received.
         """
         self.kill()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
 from scaffold import Scaffold
+import sys
 from zmq import Context, PUB, RCVMORE, SNDMORE, SUB, SUBSCRIBE
 
 
@@ -28,28 +28,47 @@ class ProxyWindmill(Scaffold):
     def __init__(self, **kwargs):
         Scaffold.__init__(self)
 
-        input_sock_type = SUB
-        input_sock_url = 'tcp://localhost:6667'
-        input_sock_filter = ''
+        self.input_sock_url = 'tcp://localhost:6667'
+        self.input_sock_filter = ''
+        self.output_sock_url = 'tcp://*:6668'
 
-        server_sock = self.zmq_ctx.socket(input_sock_type)
-        server_sock.connect(input_sock_url)
-        server_sock.setsockopt(SUBSCRIBE, input_sock_filter)
+        print 'Proxy Windmill Initialized ...'
+
+
+    def configuration_options(self, arg_parser=None):
+        assert arg_parser
+        arg_parser.add_argument('--input_sock_url',
+                                default=self.input_sock_url,
+                                help='The url that the proxy will subscribe '
+                                     'for messages.')
+        arg_parser.add_argument('--input_sock_filter',
+                                default=self.input_sock_filter,
+                                help="This will set a 0mq filter subscription"
+                                     " input.")
+        arg_parser.add_argument('--output_sock_url',
+                                default=self.output_sock_url,
+                                help='The url that the proxy will publish '
+                                     'messages upon.')
+
+
+    def configure(self, args=None):
+        assert args
+        self.input_sock_url = args.input_sock_url
+        self.output_sock_url = args.output_sock_url
+
+        server_sock = self.zmq_ctx.socket(SUB)
+        server_sock.connect(self.input_sock_url)
+        server_sock.setsockopt(SUBSCRIBE, self.input_sock_filter)
         self.register_input_sock(server_sock)
 
-        output_sock_type = PUB
-        output_sock_url = 'tcp://*:6668'
-
-        client_sock = self.zmq_ctx.socket(output_sock_type)
-        client_sock.bind(output_sock_url)
+        client_sock = self.zmq_ctx.socket(PUB)
+        client_sock.bind(self.output_sock_url)
         self.register_output_sock(client_sock)
 
         controller = self.zmq_ctx.socket(SUB)
         controller.connect('tcp://localhost:7885')
         controller.setsockopt(SUBSCRIBE, "")
         self._control_sock = controller
-
-        print 'Proxy Windmill Initialized ...'
 
 
 if __name__ == "__main__":
