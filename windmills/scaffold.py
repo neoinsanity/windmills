@@ -13,7 +13,7 @@ class Scaffold(Cornerstone):
 
 
     def __init__(self, **kwargs):
-        Cornerstone.__init__(self)
+        Cornerstone.__init__(self, **kwargs)
 
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs:
@@ -37,15 +37,16 @@ class Scaffold(Cornerstone):
         if argv is None:
             raise ValueError("The argv argument is missing.")
 
+        arg_parser = argparse.ArgumentParser()
+
         # if this is the command line args directly, them we need to remove the
-        # first argument which is the python execution command.
+        # first argument which is the python execution command. it is
         if argv[0].endswith('.py'):
             argv.pop(0)
 
-        self._arg_parser = argparse.ArgumentParser()
         self.__invoke_method_on_bases__(func_name='configuration_options',
-                                     arg_parser=self._arg_parser)
-        self._args = self._arg_parser.parse_args(argv)
+                                     arg_parser=arg_parser)
+        self._args = arg_parser.parse_args(argv)
         #todo: raul - iterate over args attrs to set on self
         self.__invoke_method_on_bases__(func_name='configure',
                                      args=self._args)

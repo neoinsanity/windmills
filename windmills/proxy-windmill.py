@@ -14,25 +14,26 @@ class ProxyWindmill(Scaffold):
     >>> from threading import Thread
     >>> import time
     >>> from zmq import Context, SUB, SUBSCRIBE
-    >>> foo = ProxyWindmill()
-    Proxy Windmill Initialized ...
+    >>> arg_list = ['--verbose']
+    >>> foo = ProxyWindmill(argv=arg_list)
     >>> t = Thread(target=foo.run)
-    >>> t.start()
+    >>> t.start() # doctest: +ELLIPSIS
+    Beginning run() with state: <proxy-windmill.ProxyWindmill object at ...>
     >>> time.sleep(3)
     >>> foo.kill()
-    >>> t.join(3)
+    >>> t.join(1)
     Stop flag triggered ... shutting down.
+    >>> assert not t.is_alive()
     """
 
 
     def __init__(self, **kwargs):
-        Scaffold.__init__(self)
-
+        # set up the initial default settings
         self.input_sock_url = 'tcp://localhost:6667'
         self.input_sock_filter = ''
         self.output_sock_url = 'tcp://*:6668'
 
-        print 'Proxy Windmill Initialized ...'
+        Scaffold.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):
@@ -69,6 +70,9 @@ class ProxyWindmill(Scaffold):
         controller.connect('tcp://localhost:7885')
         controller.setsockopt(SUBSCRIBE, "")
         self._control_sock = controller
+
+        if self.verbose:
+            print 'ProxyWindmill configured...'
 
 
 if __name__ == "__main__":

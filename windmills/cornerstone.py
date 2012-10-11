@@ -2,12 +2,12 @@
 Cornerstone provides a 0mq core that consists of an input, output,
 and control socket.
 
-
-
 Configuration options provided by the Cornerstone class.
     optional arguments:
         --heartbeat HEARTBEAT
             Set the heartbeat rete in seconds of the core 0mq poller.
+        --monitor_stream
+            Enable the sampling of message flow.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
@@ -32,7 +32,6 @@ class Cornerstone(Miller):
     >>> time.sleep(3)
     >>> foo.kill()
     >>> t.join(1)
-    Stop flag triggered ... shutting down.
     >>> assert not t.is_alive()
     >>> # socket to receive control messages on
     >>> ctx = foo.zmq_ctx
@@ -45,12 +44,11 @@ class Cornerstone(Miller):
     >>> time.sleep(3)
     >>> foo.kill()
     >>> t.join(1)
-    Stop flag triggered ... shutting down.
     >>> assert not t.is_alive()
     """
 
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self._input_sock = None
         self._output_sock = None
         self._control_sock = None
@@ -75,6 +73,9 @@ class Cornerstone(Miller):
         # verbose level is off by default
         self.verbose = False
 
+        # monitoring of message stream is off by default
+        self.monitor_stream = False
+
 
     def configuration_options(self, arg_parser=None):
         """
@@ -84,20 +85,25 @@ class Cornerstone(Miller):
         Keyword Arguments:
         arg_parser - argparse.ArgumentParser object.
 
+        Sample invocation:
         >>> import argparse
         >>> parser = argparse.ArgumentParser(prog='app.py')
         >>> foo = Cornerstone()
         >>> foo.configuration_options(arg_parser=parser)
-        >>> args = parser.print_usage()
-        usage: app.py [-h] [--heartbeat HEARTBEAT] [--verbose]
+        >>> args = parser.print_usage() # doctest: +NORMALIZE_WHITESPACE
+        usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]\
+        [--verbose]
         """
         assert arg_parser
 
         arg_parser.add_argument('--heartbeat',
                                 type=int,
                                 default=3,
-                                help="Set the heartbeat rete in seconds of "
-                                     "the core 0mq poller.")
+                                help="Set the heartbeat rate in seconds of "
+                                     "the core 0mq poller timeout.")
+        arg_parser.add_argument('--monitor_stream',
+                                action='store_true',
+                                help='Enable the sampling of message flow.')
         arg_parser.add_argument('--verbose',
                                 action="store_true",
                                 help='Enable verbose log output. Useful for '
@@ -109,15 +115,22 @@ class Cornerstone(Miller):
         The configure method configures a Cornerstone instance by
         prior to the invocation of start.
 
+        Keyword Arguments:
+        args - an object with wttributes set to the argument values.
+
+        Example Usage:
         >>> foo = Cornerstone()
         >>> args = foo.__create_property_bag__()
         >>> args.heartbeat = 5
+        >>> args.monitor_stream = True
         >>> args.verbose = True
         >>> foo.configure(args=args)
         >>> assert foo.heartbeat == 5
+        >>> assert foo.monitor_stream == True
         >>> assert foo.verbose == True
         """
         self.heartbeat = args.heartbeat
+        self.monitor_stream = args.monitor_stream
         self.verbose = args.verbose
 
 
@@ -195,7 +208,6 @@ class Cornerstone(Miller):
             self._output_sock = None
 
         self._output_sock = sock
-        self._poll.register(self._control_sock, POLLIN)
 
 
     def run(self):
@@ -208,16 +220,25 @@ class Cornerstone(Miller):
         """
         self._stop = False
 
-        tick = 0
+        if self.verbose:
+            print 'Beginning run() with state:', str(self)
+
+        loop_count = 0
+        input_count = 0
         while True:
             try:
                 socks = dict(self._poll.poll(timeout=self.heartbeat))
+                loop_count += 1
+                if self.monitor_stream and (loop_count % 100) == 0:
+                    sys.stdout.write('loop(%s)' % loop_count)
+                    sys.stdout.flush()
             except ZMQError, ze:
-                if ze.errno == 4:
-                    print 'System interrupt call detected.'
+                if ze.errno == 4: # Known exception due to keyboard ctrl+c
+                    if self.verbose:
+                        print 'System interrupt call detected.'
                 else: # exit hard on unhandled exceptions
-                    print ('Unhandled exception in run execution:', ze.errno,
-                           '-', ze.strerror)
+                    print ('Unhandled exception in run execution:%d - %s'
+                           % (ze.errno, ze.strerror))
                     exit(-1)
 
             if self._input_sock and socks.get(self._input_sock) == POLLIN:
@@ -229,10 +250,9 @@ class Cornerstone(Miller):
                     self._output_sock.send(msg, SNDMORE)
                 else:
                     self._output_sock.send(msg)
-                tick += 1
-                if(tick % 100) == 0:
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
+                input_count += 1
+                if self.monitor_stream and (input_count % 10) == 0:
+                    print '.', input_count, '-', msg
 
             if self._control_sock and socks.get(self._control_sock) == POLLIN:
                 msg = self._control_sock.recv()
@@ -240,7 +260,8 @@ class Cornerstone(Miller):
                     self._control_handler(msg)
 
             if self._stop:
-                print 'Stop flag triggered ... shutting down.'
+                if self.verbose:
+                    print 'Stop flag triggered ... shutting down.'
                 break
 
 
