@@ -37,7 +37,8 @@ class Scaffold(Cornerstone):
         if argv is None:
             raise ValueError("The argv argument is missing.")
 
-        arg_parser = argparse.ArgumentParser()
+        arg_parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
         # if this is the command line args directly, them we need to remove the
         # first argument which is the python execution command. it is
