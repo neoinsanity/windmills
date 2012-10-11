@@ -1,5 +1,4 @@
-"""
-Cornerstone provides a 0mq core that consists of an input, output,
+"""Cornerstone provides a 0mq core that consists of an input, output,
 and control socket.
 
 Configuration options provided by the Cornerstone class.
@@ -11,9 +10,9 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
+from miller import Miller
 import signal
 import sys
-from miller import Miller
 from zmq import Context, Poller, POLLIN, RCVMORE, SNDMORE, ZMQError
 
 
@@ -21,18 +20,33 @@ __author__ = 'neoinsanity'
 
 
 class Cornerstone(Miller):
-    """
-    Cornerstone is
+    """ Cornerstone can be used to create a 0mq poll loop.
+
+    Upon creation of a Cornerstone instance, the initial state of the instance
+    internal xmq poll loop is passive. To start the loop call Cornerstone
+    run(). To stop the Cornerstone instance call Cornerstone.kill().
+
+    Cornerstone only allows for one zmq input port and one zmq output port.
+    Cornerstone support respectively; Cornerstone.register_input_sock() and
+    Cornerstone.register_output_sock() methods.
+
+    Cornerstone implements an internal signal handler for detection of
+    interrupt signals to handle shutdown of connection resources.
+
+    Example Usage:
     >>> import threading
     >>> import time
     >>> from zmq import Context, SUB, SUBSCRIBE
+
     >>> foo = Cornerstone()
     >>> t = threading.Thread(target=foo.run)
     >>> t.start()
     >>> time.sleep(3)
+    >>> assert t.is_alive()
     >>> foo.kill()
     >>> t.join(1)
     >>> assert not t.is_alive()
+
     >>> # socket to receive control messages on
     >>> ctx = foo.zmq_ctx
     >>> sock = ctx.socket(SUB)
