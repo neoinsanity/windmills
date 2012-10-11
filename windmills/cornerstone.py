@@ -38,7 +38,11 @@ class Cornerstone(Miller):
     >>> import time
     >>> from zmq import Context, SUB, SUBSCRIBE
 
+    >>> # create, configure, and run a Cornerstone instance
     >>> foo = Cornerstone()
+    >>> property_bag = foo.__create_property_bag__()
+    >>> property_bag.heartbeat = 1
+    >>> foo.configure(args=property_bag)
     >>> t = threading.Thread(target=foo.run)
     >>> t.start()
     >>> time.sleep(3)
@@ -47,7 +51,7 @@ class Cornerstone(Miller):
     >>> t.join(1)
     >>> assert not t.is_alive()
 
-    >>> # socket to receive control messages on
+    >>> # register an input socket
     >>> ctx = foo.zmq_ctx
     >>> sock = ctx.socket(SUB)
     >>> sock.connect('tcp://localhost:6670')
@@ -143,9 +147,13 @@ class Cornerstone(Miller):
         >>> assert foo.monitor_stream == True
         >>> assert foo.verbose == True
         """
-        self.heartbeat = args.heartbeat
-        self.monitor_stream = args.monitor_stream
-        self.verbose = args.verbose
+        assert args
+        if hasattr(args, 'heartbeat'):
+            self.heartbeat = args.heartbeat
+        if hasattr(args, 'monitor_stream'):
+            self.monitor_stream = args.monitor_stream
+        if hasattr(args, 'verbose'):
+            self.verbose = args.verbose
 
 
     def register_input_sock(self, sock):
