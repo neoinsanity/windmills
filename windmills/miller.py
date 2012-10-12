@@ -91,3 +91,33 @@ class Miller(object):
                 func(self, *args, **kwargs)
             base = base.__base__ # iterate to the next base class
 
+
+    def __copy_property_values__(self,
+                                 src=None,
+                                 target=None,
+                                 property_list=None ):
+        """
+        >>> foo = Miller()
+        >>> src = foo.__create_property_bag__()
+        >>> src.property1 = 1
+        >>> src.property2 = 2
+        >>> src.property3 = 3
+        >>> src.property4 = 4
+        >>> target = foo.__create_property_bag__()
+        >>> property_list = ['property1', 'property2', 'property3', 'un_set']
+        >>> foo.__copy_property_values__(
+        ...     src=src, target=target, property_list=property_list)
+        >>> assert hasattr(target, 'property1')
+        >>> assert hasattr(target, 'property2')
+        >>> assert hasattr(target, 'property3')
+        >>> assert not hasattr(target, 'property4') # not in property_list
+        >>> assert not hasattr(target, 'un_set') # property not in src
+        """
+        assert src
+        assert target
+        assert property_list is not None
+
+        for property_name in property_list:
+            if hasattr(src, property_name):
+                setattr(target, property_name, getattr(src, property_name))
+
