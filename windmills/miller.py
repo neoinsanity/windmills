@@ -97,6 +97,19 @@ class Miller(object):
                                  target=None,
                                  property_list=None ):
         """
+        The __copy_property_value__ method copies the property values in a
+        given list from a given source object to a target source object.
+
+        Keyword Args:
+        src -- The source object that is to be inspected for property values.
+        target -- The target object that will be modified with found values.
+        property_list -- A list of property names which are to be copied.
+
+        The __copy_property_values__ method will only copy the values from
+        src when the propery is found. In cases where a property value is not
+        found in the src object, then no change to the target object is made.
+
+        Example Usage:
         >>> foo = Miller()
         >>> src = foo.__create_property_bag__()
         >>> src.property1 = 1
