@@ -57,14 +57,14 @@ class ProxyWindmill(Scaffold):
         self.input_sock_url = args.input_sock_url
         self.output_sock_url = args.output_sock_url
 
-        server_sock = self.zmq_ctx.socket(SUB)
-        server_sock.connect(self.input_sock_url)
-        server_sock.setsockopt(SUBSCRIBE, self.input_sock_filter)
-        self.register_input_sock(server_sock)
+        sub_socket = self.zmq_ctx.socket(SUB)
+        sub_socket.connect(self.input_sock_url)
+        sub_socket.setsockopt(SUBSCRIBE, self.input_sock_filter)
+        self.register_input_sock(sub_socket)
 
-        client_sock = self.zmq_ctx.socket(PUB)
-        client_sock.bind(self.output_sock_url)
-        self.register_output_sock(client_sock)
+        sub_socket = self.zmq_ctx.socket(PUB)
+        sub_socket.bind(self.output_sock_url)
+        self.register_output_sock(sub_socket)
 
         controller = self.zmq_ctx.socket(SUB)
         controller.connect('tcp://localhost:7885')
