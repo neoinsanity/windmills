@@ -13,13 +13,13 @@ class ProxyWindmill(Scaffold):
     """
     >>> from threading import Thread
     >>> import time
-    >>> from zmq import Context, SUB, SUBSCRIBE
     >>> arg_list = ['--verbose']
     >>> foo = ProxyWindmill(argv=arg_list)
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
     Beginning run() with state: <proxy-windmill.ProxyWindmill object at ...>
     >>> time.sleep(3)
+    >>> assert t.is_alive()
     >>> foo.kill()
     >>> t.join(1)
     Stop flag triggered ... shutting down.
@@ -77,5 +77,5 @@ class ProxyWindmill(Scaffold):
 
 if __name__ == "__main__":
     argv = sys.argv
-    proxyWindmill = ProxyWindmill(argv=argv)
-    proxyWindmill.run()
+    proxy_windmill = ProxyWindmill(argv=argv)
+    proxy_windmill.run()
