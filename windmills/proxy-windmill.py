@@ -66,11 +66,6 @@ class ProxyWindmill(Scaffold):
         sub_socket.bind(self.output_sock_url)
         self.register_output_sock(sub_socket)
 
-        controller = self.zmq_ctx.socket(SUB)
-        controller.connect('tcp://localhost:7885')
-        controller.setsockopt(SUBSCRIBE, "")
-        self._control_sock = controller
-
         if self.verbose:
             print 'ProxyWindmill configured...'
 

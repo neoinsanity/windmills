@@ -13,7 +13,8 @@ Configuration options provided by the Cornerstone class.
 from miller import Miller
 import signal
 import sys
-from zmq import Context, Poller, POLLIN, RCVMORE, SNDMORE, ZMQError
+from zmq import (Context, Poller, POLLIN, RCVMORE, SNDMORE, SUB, SUBSCRIBE,
+                 ZMQError)
 
 
 __author__ = 'neoinsanity'
@@ -155,6 +156,14 @@ class Cornerstone(Miller):
         if hasattr(args, 'verbose'):
             self.verbose = args.verbose
 
+        #todo: raul - move this section to command configuraiton layer
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # of course this is when a command configuration layer get's added
+        controller = self.zmq_ctx.socket(SUB)
+        controller.connect('tcp://localhost:7885')
+        controller.setsockopt(SUBSCRIBE, "")
+        self._control_sock = controller
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     def register_input_sock(self, sock):
         """
