@@ -20,7 +20,7 @@ class Scaffold(Cornerstone):
 
     Any classes sharing a base class chain with Scaffold will need to
     implement:
-        - configure_optins(self, arg_parser)
+        - configure_options(self, arg_parser)
             arg_parser - is an argparse.ArgumentParser object that is used by
             each implementing base class to declare configuretion options.
         = configure(self, args)
