@@ -82,9 +82,13 @@ class Cornerstone(Miller):
         # create the zmq context
         self.zmq_ctx = Context()
 
-        # create the default handler, if none has been assigned.
-        if not hasattr(self, '_control_handler'):
-            self._control_handler = self._default_command_handler
+        # set the default input receive handler, if none has been assigned
+        if not hasattr(self, '_input_recv_handler'):
+            self._input_recv_handler = self._default_recv_handler
+
+        # set the default handler, if none has been assigned.
+        if not hasattr(self, '_command_handler'):
+            self._command_handler = self._default_command_handler
 
         # construct the poller
         self._poll = Poller()
@@ -135,7 +139,7 @@ class Cornerstone(Miller):
         prior to the invocation of start.
 
         Keyword Arguments:
-        args - an object with wttributes set to the argument values.
+        args - an object with attributes set to the argument values.
 
         Example Usage:
         >>> foo = Cornerstone()
@@ -164,6 +168,7 @@ class Cornerstone(Miller):
         controller.setsockopt(SUBSCRIBE, "")
         self._control_sock = controller
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
     def register_input_sock(self, sock):
         """
@@ -241,6 +246,11 @@ class Cornerstone(Miller):
         self._output_sock = sock
 
 
+    def send(self, msg):
+        assert msg
+        self._output_sock.send(msg)
+
+
     def run(self):
         """
         Comment: -- AAA --
@@ -260,7 +270,7 @@ class Cornerstone(Miller):
             try:
                 socks = dict(self._poll.poll(timeout=self.heartbeat))
                 loop_count += 1
-                if self.monitor_stream and (loop_count % 100) == 0:
+                if self.monitor_stream and (loop_count % 1000) == 0:
                     sys.stdout.write('loop(%s)' % loop_count)
                     sys.stdout.flush()
             except ZMQError, ze:
@@ -287,8 +297,8 @@ class Cornerstone(Miller):
 
             if self._control_sock and socks.get(self._control_sock) == POLLIN:
                 msg = self._control_sock.recv()
-                if self._control_handler is not None:
-                    self._control_handler(msg)
+                if self._command_handler is not None:
+                    self._command_handler(msg)
 
             if self._stop:
                 if self.verbose:
@@ -311,6 +321,22 @@ class Cornerstone(Miller):
         during __init__ invocation.
         """
         self.kill()
+
+
+    def _default_recv_handler(self, sock):
+        """
+        This is the default receiving handler for requests comming in on an
+        input socket. The default handler simply takes incoming messages and
+        passes them to the registed output socket.
+        """
+        msg = self._input_sock.recv()
+        more = self._input_sock.getsockopt(RCVMORE)
+        if more:
+            self._output_sock.send(msg, SNDMORE)
+        else:
+            self._output_sock.send(msg)
+
+        return msg
 
 
     def _default_command_handler(self, msg):
