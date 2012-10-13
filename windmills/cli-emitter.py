@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from scaffold import Scaffold
 import sys
+import time
+from zmq import PUSH
 
 
 __author__ = 'neoinsanity'
@@ -12,21 +14,25 @@ class CliEmitter(Scaffold):
     """
     >>> from threading import Thread
     >>> import time
-    >>> arg_list = ['--verbose']
+    >>> from zmq import PULL
+    >>> arg_list = ['--verbose', '--output_sock_url', 'tcp://*:9999']
     >>> foo = CliEmitter(argv=arg_list)
-    >>> t = Thread(target=foo.run)
-    >>> t.start() # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    >>> time.sleep(3)
-    >>> assert t.is_alive()
-    >>> foo.kill()
-    >>> t.join(1)
-    >>> assert not t.is_alive()
+    >>> input_sock = foo.zmq_ctx.socket(PULL)
+    >>> input_sock.connect('tcp://localhost:9999')
+    >>> foo.run()
+    >>> msg = input_sock.recv()
+    >>> print msg
+    Testing 1, 2, 3
     """
 
 
     def __init__(self, **kwargs):
         # setup the initial default configuration
-        self.output_sock_url = "tcp://*.6677"
+        self.output_sock_url = "tcp://*:6677"
+        self.delay = 3
+        self.file = None
+        self.message = 'Testing 1, 2, 3'
+        self.repeat = False
 
         Scaffold.__init__(self, **kwargs)
 
@@ -39,21 +45,25 @@ class CliEmitter(Scaffold):
                                      ' messages')
         arg_parser.add_argument('-d', '--delay',
                                 type=int,
-                                default=3,
+                                default=self.delay,
                                 help='The delay in the transmission of '
-                                     'multi-line file or repeat messages.')
+                                     'multi-line file or repeat messages. A '
+                                     '0 delay will disable any delay, '
+                                     'A negative delay value is not allowed.')
         arg_parser.add_argument('-f', '--file',
+                                default=self.file,
                                 help='Use of this flag will cause cli-emitter'
                                      ' to transmit each line of a given file.'
                                      ' Use of this argument will cause '
                                      '-m|--message argument to be ignored.')
         arg_parser.add_argument('-m', '--message',
-                                default='Testing 1 2 3',
+                                default=self.message,
                                 help="The message that the emitter will send "
                                      "on the output sockeet. If the -f|--file"
                                      " flag is used, then this message flag "
                                      "is ignored.")
         arg_parser.add_argument('-r', '--repeat',
+                                default=self.repeat,
                                 action='store_true',
                                 help='This flag will cause cli-emitter to '
                                      'repeat transmission of messages. In the'
@@ -62,14 +72,45 @@ class CliEmitter(Scaffold):
 
 
     def configure(self, args=None):
+        """
+        >>> foo = CliEmitter()
+        >>> args = foo.__create_property_bag__()
+        >>> args.output_sock_url = 'tcp://*:9998'
+        >>> args.delay = 5
+        >>> args.file = '/User/local/someone/somefile'
+        >>> args.message = 'Welcome to my world'
+        >>> args.repeat = True
+        >>> foo.configure(args=args)
+        >>> assert foo.output_sock_url == args.output_sock_url
+        >>> assert foo.delay == args.delay
+        >>> assert foo.file == args.file
+        >>> assert foo.message == args.message
+        >>> assert foo.repeat == args.repeat
+        """
         assert args
+        property_list = ['output_sock_url', 'delay', 'file', 'message',
+                         'repeat']
+        self.__copy_property_values__(src=args,
+                                      target=self,
+                                      property_list=property_list)
+
+        push_socket = self.zmq_ctx.socket(PUSH)
+        push_socket.bind(self.output_sock_url)
+        self.register_output_sock(push_socket)
+
+        if self.verbose:
+            print 'CliEmitter configured...'
 
 
     def run(self):
         """
 
         """
-        pass
+        for iter in range(3):
+            self.send(self.message)
+
+        time.sleep(1)
+
 
 if __name__ == '__main__':
     argv = sys.argv

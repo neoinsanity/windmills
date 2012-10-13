@@ -13,8 +13,8 @@ Configuration options provided by the Cornerstone class.
 from miller import Miller
 import signal
 import sys
-from zmq import (Context, Poller, POLLIN, RCVMORE, SNDMORE, SUB, SUBSCRIBE,
-                 ZMQError)
+from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
+                 SUBSCRIBE, ZMQError)
 
 
 __author__ = 'neoinsanity'
@@ -285,12 +285,7 @@ class Cornerstone(Miller):
             if self._input_sock and socks.get(self._input_sock) == POLLIN:
                 #todo: raul - this whole section needs to be redone,
                 # see additional comment AAA above.
-                msg = self._input_sock.recv()
-                more = self._input_sock.getsockopt(RCVMORE)
-                if more:
-                    self._output_sock.send(msg, SNDMORE)
-                else:
-                    self._output_sock.send(msg)
+                msg = self._input_recv_handler(self._input_sock)
                 input_count += 1
                 if self.monitor_stream and (input_count % 10) == 0:
                     print '.', input_count, '-', msg
@@ -323,18 +318,21 @@ class Cornerstone(Miller):
         self.kill()
 
 
-    def _default_recv_handler(self, sock):
+    def _default_recv_handler(self, input_sock):
         """
         This is the default receiving handler for requests comming in on an
         input socket. The default handler simply takes incoming messages and
         passes them to the registed output socket.
+
+        Return: msg -- The message that is returned from invocation of the
+        recv on the input socket.
         """
-        msg = self._input_sock.recv()
-        more = self._input_sock.getsockopt(RCVMORE)
+        msg = input_sock.recv()
+        more = input_sock.getsockopt(RCVMORE)
         if more:
             self._output_sock.send(msg, SNDMORE)
         else:
-            self._output_sock.send(msg)
+            self._output_sock.send(msg, NOBLOCK)
 
         return msg
 
