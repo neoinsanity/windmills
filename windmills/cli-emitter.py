@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from scaffold import Scaffold
+from lib import Scaffold
 import sys
 import time
 from zmq import PUSH

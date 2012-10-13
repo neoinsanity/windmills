@@ -2,7 +2,7 @@
 options for the construction of *-windmill and app devices.
 """
 import argparse
-from cornerstone import Cornerstone
+from lib.cornerstone import Cornerstone
 
 
 __author__ = 'neoinsanity'
