@@ -53,11 +53,14 @@ class CliListener(Scaffold):
                                       target=self,
                                       property_list=property_list)
 
+        if self.file is not None:
+            self._file = open(self.file, 'w')
+
         pull_socket = self.zmq_ctx.socket(PULL)
         pull_socket.connect(self.input_sock_url)
         self.register_input_sock(pull_socket)
 
-        #todo: raul - find a better way to do socket.recv handling registraing
+        #todo: raul - find a better way to do socket.recv handling registring
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # self._input_recv_handler is defined in the Cornerstone class.
         self._input_recv_handler = self._listener_recv_handler
@@ -75,9 +78,13 @@ class CliListener(Scaffold):
         one is provided.
         """
         msg = self._input_sock.recv()
-        sys.stdout.write(msg)
-        sys.stdout.write('\n')
-        sys.stdout.flush()
+
+        if(self.file is None):
+            sys.stdout.write(msg)
+            sys.stdout.flush()
+        else:
+            self._file.write(msg)
+            self._file.flush()
 
 
 if __name__ == '__main__':
