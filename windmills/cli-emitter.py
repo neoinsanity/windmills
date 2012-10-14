@@ -127,6 +127,8 @@ class CliEmitter(Scaffold):
         with open(self.file, 'r') as f:
             for msg in f:
                 self._transmit(msg)
+                if(self.isStopped()):
+                    break
 
 
     def _send_msg(self):
