@@ -73,7 +73,7 @@ class Cornerstone(Miller):
         self._control_sock = None
 
         # configure the interrupt handling
-        self.stop = False
+        self._stop = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         # a regular hearbeat interval must be set to the default.
@@ -251,6 +251,10 @@ class Cornerstone(Miller):
         self._output_sock.send(msg)
 
 
+    def isStopped(self):
+        return self._stop
+
+
     def run(self):
         """
         Comment: -- AAA --
@@ -332,7 +336,7 @@ class Cornerstone(Miller):
         if more:
             self._output_sock.send(msg, SNDMORE)
         else:
-            self._output_sock.send(msg, NOBLOCK)
+            self._output_sock.send(msg)
 
         return msg
 
