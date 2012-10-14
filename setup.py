@@ -8,7 +8,8 @@ setup(
     package_dir={'': 'windmills'},
     url='https://github.com/neoinsanity/windmills',
     license='Apache License 2.0',
-    author='neoinsanity',
+    author='Raul Gonzalez',
     author_email='mindbender@gmail.com',
-    description='This is a set of tools and libraries focused on creating 0mq solutions.'
+    description='This is a set of tools and libraries focused on creating 0mq'
+                ' solutions.'
 )
