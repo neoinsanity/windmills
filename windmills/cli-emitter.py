@@ -29,7 +29,7 @@ class CliEmitter(Scaffold):
     def __init__(self, **kwargs):
         # setup the initial default configuration
         self.output_sock_url = "tcp://*:6677"
-        self.delay = 3
+        self.delay = 1
         self.file = None
         self.message = 'Testing 1, 2, 3'
         self.repeat = False
@@ -106,10 +106,38 @@ class CliEmitter(Scaffold):
         """
 
         """
-        for iter in range(3):
-            self.send(self.message)
 
+        if self.file is None:
+            send_method = self._send_msg
+        else:
+            send_method = self._send_file
+
+        if not self.repeat:
+            send_method()
+        else:
+            # todo: raul - need better way to do stop notification
+            while(not self.isStopped()):
+                send_method()
+
+        # give it time to die.
         time.sleep(1)
+
+
+    def _send_file(self):
+        with open(self.file, 'r') as f:
+            for msg in f:
+                self._transmit(msg)
+
+
+    def _send_msg(self):
+        self._transmit(self.message)
+
+
+    def _transmit(self, msg):
+        if self.delay > 0:
+            time.sleep(self.delay)
+
+        self.send(msg)
 
 
 if __name__ == '__main__':
