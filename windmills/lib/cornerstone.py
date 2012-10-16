@@ -277,6 +277,26 @@ class Cornerstone(Miller):
                 if self.monitor_stream and (loop_count % 1000) == 0:
                     sys.stdout.write('loop(%s)' % loop_count)
                     sys.stdout.flush()
+
+                if self._input_sock and socks.get(self._input_sock) == POLLIN:
+                    #todo: raul - this whole section needs to be redone,
+                    # see additional comment AAA above.
+                    msg = self._input_recv_handler(self._input_sock)
+                    input_count += 1
+                    if self.monitor_stream and (input_count % 10) == 0:
+                        print '.', input_count, '-', msg
+
+                if (self._control_sock and
+                    socks.get(self._control_sock) == POLLIN):
+                    msg = self._control_sock.recv()
+                    if self._command_handler is not None:
+                        self._command_handler(msg)
+
+                if self._stop:
+                    if self.verbose:
+                        print 'Stop flag triggered ... shutting down.'
+                    break
+
             except ZMQError, ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     if self.verbose:
@@ -285,24 +305,6 @@ class Cornerstone(Miller):
                     print ('Unhandled exception in run execution:%d - %s'
                            % (ze.errno, ze.strerror))
                     exit(-1)
-
-            if self._input_sock and socks.get(self._input_sock) == POLLIN:
-                #todo: raul - this whole section needs to be redone,
-                # see additional comment AAA above.
-                msg = self._input_recv_handler(self._input_sock)
-                input_count += 1
-                if self.monitor_stream and (input_count % 10) == 0:
-                    print '.', input_count, '-', msg
-
-            if self._control_sock and socks.get(self._control_sock) == POLLIN:
-                msg = self._control_sock.recv()
-                if self._command_handler is not None:
-                    self._command_handler(msg)
-
-            if self._stop:
-                if self.verbose:
-                    print 'Stop flag triggered ... shutting down.'
-                break
 
 
     def kill(self):
