@@ -63,7 +63,10 @@ class CliListener(Scaffold):
         #todo: raul - find a better way to do socket.recv handling registring
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # self._input_recv_handler is defined in the Cornerstone class.
-        self._input_recv_handler = self._listener_recv_handler
+        #Override with out own listener
+        args.recv = '_listener_recv_handler'
+
+        #self._input_recv_handler = self._listener_recv_handler
         # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         if self.verbose:
