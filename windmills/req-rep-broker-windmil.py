@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 from lib import Scaffold
-from zmq import POLLIN, RCVMORE, ROUTER, SNDMORE, ZMQError
+from zmq import DEALER, POLLIN, RCVMORE, ROUTER, SNDMORE, ZMQError
 
 
 __author__ = 'neoinsanity'
@@ -44,7 +44,10 @@ class ReqRepBrokerWindmill(Scaffold):
 
         router_sock = self.zmq_ctx.socket(ROUTER)
         router_sock.bind(self.router_sock_url)
+        self.register_input_sock()
 
+        dealer_sock = self.zmq_ctx.socket(DEALER)
+        dealer_sock.bind(self.dealer_sock_url)
 
     def run(self):
         self._stop = False
