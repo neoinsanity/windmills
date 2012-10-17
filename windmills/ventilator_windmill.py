@@ -36,7 +36,6 @@ class VentilatorWindmill(Scaffold):
         self.output_sock_url = 'tcp://*:6678'
         self.output_sock_type = "PUSH"
 
-
         Scaffold.__init__(self, **kwargs)
 
 
@@ -48,30 +47,32 @@ class VentilatorWindmill(Scaffold):
                                      'connect and pull messages.')
         arg_parser.add_argument('--input_sock_type',
                                 default=self.input_sock_type,
-                                help='The socket type that the ventilator will use on input')
+                                help='The socket type that the ventilator '
+                                     'will use on input')
         arg_parser.add_argument('--output_sock_url',
                                 default=self.output_sock_url,
                                 help='The url that the ventilator will bind '
                                      'and push messages.')
         arg_parser.add_argument('--output_sock_type',
                                 default=self.output_sock_type,
-                                help='The socket type that the ventilator will use on output')
+                                help='The socket type that the ventilator '
+                                     'will use on output')
 
-    def configure(self, args=None):
-        assert args
-        self.input_sock_url = args.input_sock_url
-        self.output_sock_url = args.output_sock_url
-        self.input_sock_type = args.input_sock_type
-        self.output_sock_type = args.output_sock_type
 
-        pull_socket = self.zmq_ctx.socket(getattr(zmq, self.input_sock_type))
-        pull_socket.connect(self.input_sock_url)
-        self.register_input_sock(pull_socket)
+def configure(self, args=None):
+    assert args
+    self.input_sock_url = args.input_sock_url
+    self.output_sock_url = args.output_sock_url
+    self.input_sock_type = args.input_sock_type
+    self.output_sock_type = args.output_sock_type
 
-        push_socket = self.zmq_ctx.socket(getattr(zmq, self.output_sock_type))
-        push_socket.bind(self.output_sock_url)
-        self.register_output_sock(push_socket)
+    pull_socket = self.zmq_ctx.socket(getattr(zmq, self.input_sock_type))
+    pull_socket.connect(self.input_sock_url)
+    self.register_input_sock(pull_socket)
 
+    push_socket = self.zmq_ctx.socket(getattr(zmq, self.output_sock_type))
+    push_socket.bind(self.output_sock_url)
+    self.register_output_sock(push_socket)
 
 
 if __name__ == '__main__':
