@@ -2,13 +2,13 @@
 options for the construction of *-windmill and app devices.
 """
 import argparse
-from lib.cornerstone import Cornerstone
+from lib.brick import Brick
 
 
 __author__ = 'neoinsanity'
 
 
-class Scaffold(Cornerstone):
+class Scaffold(Brick):
     """
     The Scaffold class is a helper mix-in that evaluates sys.argv into options
     settings for execution of windmill devices.
@@ -34,7 +34,7 @@ class Scaffold(Cornerstone):
 
 
     def __init__(self, **kwargs):
-        Cornerstone.__init__(self, **kwargs)
+        Brick.__init__(self, **kwargs)
 
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs:

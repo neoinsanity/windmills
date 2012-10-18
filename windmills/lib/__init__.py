@@ -1,5 +1,6 @@
 __author__ = 'neoinsanity'
 
+from brick import Brick
 from cornerstone import Cornerstone
 from miller import Miller
 from scaffold import Scaffold
