@@ -4,6 +4,11 @@ import sys
 import time
 from zmq import PUSH
 
+# todo: raul - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# todo: raul - This CliEmitter does not have a complete socket configuration
+# Make sure you fix this. Don't do it by just hacking into a generalize
+# socket generation, then I start talking gibberish - but you get the idea.
+# todo: raul - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 __author__ = 'neoinsanity'
 #
@@ -29,6 +34,7 @@ class CliEmitter(Scaffold):
     def __init__(self, **kwargs):
         # setup the initial default configuration
         self.output_sock_url = "tcp://*:6677"
+        self.output_sock_type = 'PUSH'
         self.delay = 1
         self.file = None
         self.message = 'Testing 1, 2, 3'
