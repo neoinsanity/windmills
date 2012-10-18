@@ -10,7 +10,7 @@ from ventilator_windmill import VentilatorWindmill
 __author__ = 'neoinsanity'
 
 
-class ConfigInstantiator():
+class DonQuixote():
     service_map = {
         'cli_emitter': CliEmitter,
         'cli_listener': CliListener,
@@ -43,7 +43,7 @@ class ConfigInstantiator():
 
             the_service = None
 
-            service_class = ConfigInstantiator.service_map[service_type]
+            service_class = DonQuixote.service_map[service_type]
             assert service_class
             the_service = service_class(argv=args)
 
@@ -87,6 +87,6 @@ if __name__ == '__main__':
 
     assert args.file
 
-    config_instantiator = ConfigInstantiator(file=args.file,
-                                             verbose=args.verbose)
+    config_instantiator = DonQuixote(file=args.file,
+                                     verbose=args.verbose)
     config_instantiator.run()
