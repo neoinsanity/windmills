@@ -2,23 +2,31 @@
 import argparse
 import json
 from threading import Thread
-import time
 from cli_emitter import CliEmitter
 from cli_listener import CliListener
 from ventilator_windmill import VentilatorWindmill
-
-import unicodedata
 
 
 __author__ = 'neoinsanity'
 
 
 class ConfigInstantiator():
+    service_map = {
+        'cli_emitter': CliEmitter,
+        'cli_listener': CliListener,
+        'ventilator_windmill': VentilatorWindmill
+    }
+
+
     def __init__(self, file=None):
         """
         """
         # load the config file
         assert file
+
+        # configure the interrupt handling
+        self._stop = False
+        #signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         config_json = open(file).read()
         print config_json
@@ -36,14 +44,9 @@ class ConfigInstantiator():
 
             the_service = None
 
-            if service_type == 'cli_listener':
-                the_service = CliListener(argv=args)
-
-            if service_type == 'ventilator-windmill':
-                the_service = VentilatorWindmill(argv=args)
-
-            if service_type == 'cli-emitter':
-                the_service = CliEmitter(argv=args)
+            service_class = ConfigInstantiator.service_map[service_type]
+            assert service_class
+            the_service = service_class(argv=args)
 
             assert the_service
 
@@ -53,6 +56,7 @@ class ConfigInstantiator():
             t = Thread(target=service_inst.run)
             t.start()
             assert t.is_alive
+
 
     def run(self):
         pass
