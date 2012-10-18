@@ -9,7 +9,7 @@ __author__ = 'neoinsanity'
 # req-rep-broker-windmill
 #
 
-class ReqRepBrokerWindmill(Scaffold):
+class RouterDealerWindmill(Scaffold):
     """
 
     """
@@ -103,5 +103,5 @@ class ReqRepBrokerWindmill(Scaffold):
 
 if __name__ == '__main__':
     argv = sys.argv
-    broker = ReqRepBrokerWindmill(argv=argv)
+    broker = RouterDealerWindmill(argv=argv)
     broker.run()
