@@ -17,8 +17,8 @@ class ReqRepBrokerWindmill(Scaffold):
 
     def __init__(self, **kwargs):
         # setup the initial default settings
-        self.router_sock_url = 'tcp://*.8888'
-        self.dealer_sock_url = 'tcp://*.8889'
+        self.router_sock_url = 'tcp://*:8888'
+        self.dealer_sock_url = 'tcp://*:8889'
 
         self._router_sock = None
         self._dealer_sock = None
@@ -30,10 +30,10 @@ class ReqRepBrokerWindmill(Scaffold):
         assert arg_parser
 
         arg_parser.add_argument('--router_sock_url',
-                                default=self._router_sock,
+                                default=self.router_sock_url,
                                 help="Set the url address for router.")
         arg_parser.add_argument('--dealer_sock_url',
-                                default=self._dealer_sock,
+                                default=self.dealer_sock_url,
                                 help='Set the url address for dealer')
 
 
@@ -44,10 +44,12 @@ class ReqRepBrokerWindmill(Scaffold):
 
         router_sock = self.zmq_ctx.socket(ROUTER)
         router_sock.bind(self.router_sock_url)
-        self.register_input_sock()
+        self._router_sock = router_sock
 
         dealer_sock = self.zmq_ctx.socket(DEALER)
         dealer_sock.bind(self.dealer_sock_url)
+        self._dealer_sock = dealer_sock
+
 
     def run(self):
         self._stop = False
@@ -91,7 +93,7 @@ class ReqRepBrokerWindmill(Scaffold):
                             print '.', back_end_loop, '-', msg, '-'
 
             except ZMQError, ze:
-                if ze.errno == 6: # known exception due to keyboard ctrl+c
+                if ze.errno == 4: # known exception due to keyboard ctrl+c
                     if self.verbose:
                         print 'System interrupt detected.'
                 else: # exit hard on unhandled exception
