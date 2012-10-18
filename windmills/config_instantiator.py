@@ -18,15 +18,18 @@ class ConfigInstantiator():
     }
 
 
-    def __init__(self, file=None):
+    def __init__(self, file=None, verbose=False):
         """
         """
         # load the config file
         assert file
+        self.file = file
+        self.verbose = verbose
 
         config_json = open(file).read()
-        print config_json
         config = json.loads(config_json)
+        if self.verbose:
+            print config_json
 
         # create a service instance holder
         self.active_services = list()
@@ -79,9 +82,11 @@ class ConfigInstantiator():
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-f', '--file', help='The configuration file.')
+    arg_parser.add_argument('--verbose', action='store_true')
     args = arg_parser.parse_args()
 
     assert args.file
 
-    config_instantiator = ConfigInstantiator(file=args.file)
+    config_instantiator = ConfigInstantiator(file=args.file,
+                                             verbose=args.verbose)
     config_instantiator.run()
