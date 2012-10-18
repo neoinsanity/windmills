@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from lib import Scaffold
 import sys
-from zmq import PULL
+from zmq import PULL, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
@@ -30,6 +30,8 @@ class CliListener(Scaffold):
     def __init__(self, **kwargs):
         # setup the initial default configuration
         self.input_sock_url = "tcp://localhost:6678"
+        self.input_sock_type = 'PULL'
+        self.input_sock_filter = ""
         self.file = None
 
         Scaffold.__init__(self, **kwargs)
@@ -41,6 +43,14 @@ class CliListener(Scaffold):
                                 default=self.input_sock_url,
                                 help='The url that the listener will pull '
                                      'from to print out messages')
+        arg_parser.add_argument('--input_sock_type',
+                                default=self.input_sock_type,
+                                help='The type of socket to create. ('
+                                     'PULL|SUB)')
+        arg_parser.add_argument('--input_sock_filter',
+                                default=self.input_sock_filter,
+                                help='The filter argument is only valid if '
+                                     'the input_sock_type is set to SUB.')
         arg_parser.add_argument('-f', '--file',
                                 help='A file to append incoming messages by '
                                      'line.')
@@ -56,10 +66,14 @@ class CliListener(Scaffold):
         if self.file is not None:
             self._file = open(self.file, 'w')
 
-        pull_socket = self.zmq_ctx.socket(PULL)
-        print 'configure sock shit: ' , self.input_sock_url
+        sock_type = PULL
+        if self.input_sock_type == 'SUB':
+            sock_type = SUB
+        pull_socket = self.zmq_ctx.socket(sock_type)
+        if sock_type == SUB:
+            pull_socket.setsockopt(SUBSCRIBE, self.input_sock_filter)
+
         pull_socket.connect(self.input_sock_url)
-        #pull_socket.connect("inproc://shit")
         self.register_input_sock(pull_socket)
 
         #todo: raul - find a better way to do socket.recv handling registring
