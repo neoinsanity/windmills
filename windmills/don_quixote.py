@@ -87,6 +87,6 @@ if __name__ == '__main__':
 
     assert args.file
 
-    config_instantiator = DonQuixote(file=args.file,
-                                     verbose=args.verbose)
-    config_instantiator.run()
+    don = DonQuixote(file=args.file,
+                     verbose=args.verbose)
+    don.run()
