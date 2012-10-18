@@ -131,6 +131,9 @@ class Cornerstone(Miller):
                                 action="store_true",
                                 help='Enable verbose log output. Useful for '
                                      'debugging.')
+        arg_parser.add_argument('--recv',
+                                default="_default_recv_handler",
+                                help="The method to call on receive")
 
 
     def configure(self, args=None):
@@ -159,6 +162,13 @@ class Cornerstone(Miller):
             self.monitor_stream = args.monitor_stream
         if hasattr(args, 'verbose'):
             self.verbose = args.verbose
+        if hasattr(args, 'recv'):
+            if not hasattr(self, args.recv):
+                print ('Invalid receive listener: %s on %s'
+                       % (args.recv, self))
+                exit(-1)
+            else:
+                self._input_recv_handler = getattr(self, args.recv)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
