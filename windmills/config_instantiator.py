@@ -24,10 +24,6 @@ class ConfigInstantiator():
         # load the config file
         assert file
 
-        # configure the interrupt handling
-        self._stop = False
-        #signal.signal(signal.SIGINT, self._signal_interrupt_handler)
-
         config_json = open(file).read()
         print config_json
         config = json.loads(config_json)
@@ -52,14 +48,32 @@ class ConfigInstantiator():
 
             self.active_services.append(the_service)
 
+
+    def run(self):
+        thread_service_map = dict()
+
         for service_inst in self.active_services:
             t = Thread(target=service_inst.run)
             t.start()
             assert t.is_alive
+            thread_service_map[t] = service_inst
 
+        _ = raw_input('Touch me and we die <return>:')
 
-    def run(self):
-        pass
+        for t_key in thread_service_map.keys():
+            service = thread_service_map[t_key]
+            service.kill()
+            for attempt in range(3):
+                t_key.join(1)
+                if not t_key.is_alive(): break
+
+            if t_key.is_alive():
+                print ('Service', service,
+                       'has not shutdown, will attempt to force')
+                try:
+                    t_key._Thread__stop()
+                except:
+                    print 'Service failed to stop:', service
 
 
 if __name__ == '__main__':
