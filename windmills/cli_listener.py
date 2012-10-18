@@ -57,7 +57,9 @@ class CliListener(Scaffold):
             self._file = open(self.file, 'w')
 
         pull_socket = self.zmq_ctx.socket(PULL)
+        print 'configure sock shit: ' , self.input_sock_url
         pull_socket.connect(self.input_sock_url)
+        #pull_socket.connect("inproc://shit")
         self.register_input_sock(pull_socket)
 
         #todo: raul - find a better way to do socket.recv handling registring

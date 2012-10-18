@@ -59,20 +59,20 @@ class VentilatorWindmill(Scaffold):
                                      'will use on output')
 
 
-def configure(self, args=None):
-    assert args
-    self.input_sock_url = args.input_sock_url
-    self.output_sock_url = args.output_sock_url
-    self.input_sock_type = args.input_sock_type
-    self.output_sock_type = args.output_sock_type
+    def configure(self, args=None):
+        assert args
+        self.input_sock_url = args.input_sock_url
+        self.output_sock_url = args.output_sock_url
+        self.input_sock_type = args.input_sock_type
+        self.output_sock_type = args.output_sock_type
 
-    pull_socket = self.zmq_ctx.socket(getattr(zmq, self.input_sock_type))
-    pull_socket.connect(self.input_sock_url)
-    self.register_input_sock(pull_socket)
+        pull_socket = self.zmq_ctx.socket(getattr(zmq, self.input_sock_type))
+        pull_socket.connect(self.input_sock_url)
+        self.register_input_sock(pull_socket)
 
-    push_socket = self.zmq_ctx.socket(getattr(zmq, self.output_sock_type))
-    push_socket.bind(self.output_sock_url)
-    self.register_output_sock(push_socket)
+        push_socket = self.zmq_ctx.socket(getattr(zmq, self.output_sock_type))
+        push_socket.bind(self.output_sock_url)
+        self.register_output_sock(push_socket)
 
 
 if __name__ == '__main__':
