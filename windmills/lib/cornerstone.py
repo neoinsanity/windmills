@@ -10,7 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from lib.miller import Miller
+from miller import Miller
 import signal
 import sys
 from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
@@ -18,6 +18,7 @@ from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
 
 
 __author__ = 'neoinsanity'
+__all__ = ['Cornerstone',]
 
 
 class Cornerstone(Miller):

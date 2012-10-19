@@ -2,10 +2,11 @@
 options for the construction of *-windmill and app devices.
 """
 import argparse
-from lib.brick import Brick
+from brick import Brick
 
 
 __author__ = 'neoinsanity'
+__all__ = ['Scaffold']
 
 
 class Scaffold(Brick):

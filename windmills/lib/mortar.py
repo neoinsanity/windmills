@@ -2,3 +2,7 @@
 """
 
 __author__ = 'neoinsanity'
+__all__ = ['Mortar']
+
+class Mortar():
+    pass

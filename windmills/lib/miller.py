@@ -1,5 +1,7 @@
 """The Miller class which provides the mix-in enabling tools."""
+
 __author__ = 'neoinsanity'
+__all__ = ['Miller']
 
 
 class Miller(object):
