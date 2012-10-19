@@ -116,7 +116,7 @@ class Cornerstone(Miller):
         >>> foo.configuration_options(arg_parser=parser)
         >>> args = parser.print_usage() # doctest: +NORMALIZE_WHITESPACE
         usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]\
-        [--verbose]
+ [--verbose] [--recv RECV]
         """
         assert arg_parser
 
