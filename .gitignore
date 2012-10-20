@@ -1,3 +1,5 @@
+test_out/
+*._output
 cover_html/
 .coverage
 .idea

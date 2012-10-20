@@ -38,7 +38,7 @@ class Scaffold(Brick):
         Brick.__init__(self, **kwargs)
 
         # if there is an argv argument, then use it to set the configuration
-        if 'argv' in kwargs:
+        if 'argv' in kwargs and kwargs.get('argv') is not None:
             self._execute_configuration(kwargs['argv'])
         else:
             empty_args = self.__create_property_bag__()

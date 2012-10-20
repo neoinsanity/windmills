@@ -215,10 +215,12 @@ class Cornerstone(Miller):
         # if there is an existing input socket, then it will be removed.
         if self._input_sock is not None:
             self._poll.unregister(self._input_sock)
+            self._input_sock.close()
             self._input_sock = None
 
         self._input_sock = sock
-        self._poll.register(self._input_sock, POLLIN)
+        if self._input_sock is not None:
+            self._poll.register(self._input_sock, POLLIN)
 
 
     def register_output_sock(self, sock):
@@ -252,6 +254,7 @@ class Cornerstone(Miller):
         """
         # if there is an existing output socket, then it will be removed.
         if self._output_sock is not None:
+            self._output_sock.close()
             self._output_sock = None
 
         self._output_sock = sock
@@ -316,6 +319,10 @@ class Cornerstone(Miller):
                     print ('Unhandled exception in run execution:%d - %s'
                            % (ze.errno, ze.strerror))
                     exit(-1)
+
+        # close the sockets held by the poller
+        self.register_input_sock(sock=None)
+        self.register_output_sock(sock=None)
 
 
     def kill(self):
