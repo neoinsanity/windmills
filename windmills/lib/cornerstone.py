@@ -10,7 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from miller import Miller
+from lib.miller import Miller
 import signal
 import sys
 from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE, SUB,

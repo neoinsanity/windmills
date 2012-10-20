@@ -11,6 +11,7 @@ from zmq import PUSH
 # todo: raul - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 __author__ = 'neoinsanity'
+__all__ = ['CliEmitter']
 #
 # cli-emitter
 #

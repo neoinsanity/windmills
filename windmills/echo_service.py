@@ -4,6 +4,7 @@ from zmq import REP
 
 
 __author__ = 'neoinsanity'
+__all__ = ['EchoService']
 #
 # echo-windmill
 #

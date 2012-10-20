@@ -1,7 +1,7 @@
 """Brick is a mix-in that contains functionality to configure input and
 output sockets for 0mq device and service patterns.
 """
-from cornerstone import Cornerstone
+from lib.cornerstone import Cornerstone
 
 
 __author__ = 'neoinsanity'

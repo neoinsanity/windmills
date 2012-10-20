@@ -8,7 +8,10 @@ from ventilator_windmill import VentilatorWindmill
 
 
 __author__ = 'neoinsanity'
-
+__all__ = ['DonQuixote']
+#
+# don_quxote
+#
 
 class DonQuixote():
     service_map = {

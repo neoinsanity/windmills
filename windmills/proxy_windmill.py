@@ -5,6 +5,7 @@ from zmq import Context, PUB, RCVMORE, SNDMORE, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
+__all__ = ['ProxyWindmill']
 #
 # proxy-windmill
 #
@@ -17,7 +18,7 @@ class ProxyWindmill(Scaffold):
     >>> foo = ProxyWindmill(argv=arg_list)
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
-    Beginning run() with state: <proxy-windmill.ProxyWindmill object at ...>
+    Beginning run() with state: <proxy_windmill.ProxyWindmill object at ...>
     >>> time.sleep(3)
     >>> assert t.is_alive()
     >>> foo.kill()
@@ -54,9 +55,9 @@ class ProxyWindmill(Scaffold):
 
     def configure(self, args=None):
         assert args
-        property_list=['input_sock_url',
-                       'input_sock_filter',
-                       'output_sock_filter']
+        property_list = ['input_sock_url',
+                         'input_sock_filter',
+                         'output_sock_filter']
         self.__copy_property_values__(args, self, property_list=property_list)
 
         sub_socket = self.zmq_ctx.socket(SUB)

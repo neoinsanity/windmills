@@ -5,6 +5,7 @@ from zmq import DEALER, POLLIN, RCVMORE, ROUTER, SNDMORE, ZMQError
 
 
 __author__ = 'neoinsanity'
+__all__ = ['RouterDealerWindmill']
 #
 # req-rep-broker-windmill
 #

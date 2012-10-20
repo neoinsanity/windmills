@@ -5,6 +5,7 @@ import zmq
 
 
 __author__ = 'neoinsanity'
+__all__ = ['VentilatorWindmill']
 #
 # ventilator-windmill()
 #
@@ -17,7 +18,7 @@ class VentilatorWindmill(Scaffold):
     >>> foo = VentilatorWindmill(argv=arg_list)
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    Beginning run() with state: <ventilator-windmill.VentilatorWindmill
+    Beginning run() with state: <ventilator_windmill.VentilatorWindmill
     object at ...>
     >>> time.sleep(3)
     >>> assert t.is_alive()

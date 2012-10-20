@@ -5,6 +5,7 @@ from zmq import PULL, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
+__all__ = ['CliListener']
 #
 # cli-listener
 #
@@ -17,7 +18,7 @@ class CliListener(Scaffold):
     >>> foo = CliListener(argv=arg_list)
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
-    Beginning run() with state: <cli-listener.CliListener object at ...>
+    Beginning run() with state: <cli_listener.CliListener object at ...>
     >>> time.sleep(3)
     >>> assert t.is_alive()
     >>> foo.kill()
