@@ -40,6 +40,10 @@ class Scaffold(Brick):
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs:
             self._execute_configuration(kwargs['argv'])
+        else:
+            empty_args = self.__create_property_bag__()
+            self.__invoke_method_on_bases__(func_name='configure',
+                                            args=empty_args)
 
 
     def _execute_configuration(self, argv=None):
