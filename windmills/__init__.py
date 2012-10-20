@@ -1,4 +1,6 @@
 __author__ = 'neoinsanity'
+__all__ = ['CliEmitter', 'CliListener', 'DonQuixote', 'EchoService',
+           'ProxyWindmill', 'RouterDealerWindmill', 'VentilatorWindmill']
 
 from cli_emitter import CliEmitter
 from cli_listener import CliListener

@@ -1,3 +1,4 @@
+cover_html/
 .coverage
 .idea
 *.pyc

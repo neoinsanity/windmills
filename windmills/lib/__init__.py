@@ -1,8 +1,8 @@
 __author__ = 'neoinsanity'
 __all__ = ['Brick', 'Cornerstone', 'Miller', 'Mortar', 'Scaffold']
 
-from lib.brick import Brick
-from lib.cornerstone import Cornerstone
-from lib.miller import Miller
-from lib.mortar import Mortar
-from lib.scaffold import Scaffold
+from brick import Brick
+from cornerstone import Cornerstone
+from miller import Miller
+from mortar import Mortar
+from scaffold import Scaffold
