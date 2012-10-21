@@ -1,15 +1,15 @@
 import os
-from threading import Thread
 import time
-import unittest
-from windmills import CliListener
+from utils_of_test import (gen_archive_output_pair,
+                           thread_wrapped_cli_listener)
+from windmill_test_case import WindmillTestCase
 from zmq import Context, PUB, PUSH
 
 
 __author__ = 'neoinsanity'
 
 
-class TestCliListener(unittest.TestCase):
+class TestCliListener(WindmillTestCase):
     def setUp(self):
         self.zmq_ctx = Context()
         push_out_sock = self.zmq_ctx.socket(PUSH)
@@ -33,7 +33,7 @@ class TestCliListener(unittest.TestCase):
 
 
     def test_cli_listener_default_behavior(self):
-        t = self._thread_wrapped_cli_listener()
+        t = thread_wrapped_cli_listener()
         try:
             t.start()
             self.assertTrue(t.is_alive(),
@@ -48,19 +48,17 @@ class TestCliListener(unittest.TestCase):
 
 
     def test_cli_listener_file_option(self):
-        archive_file, output_file = self._gen_archive_output_pair(
+        archive_file, output_file = gen_archive_output_pair(
             'cli_listener_file_option')
 
         args = ['-f', output_file]
         self._deliver_the_message('Goodbye, Yesterday', args)
 
-        arch = open(archive_file, 'r').read()
-        output = open(output_file, 'r').read()
-        self.assertMultiLineEqual(arch, output)
+        self.assertFiles(archive_file, output_file)
 
 
     def test_cli_socket_type_option(self):
-        archive_file, output_file = self._gen_archive_output_pair(
+        archive_file, output_file = gen_archive_output_pair(
             'cli_socket_type_option')
 
         args = ['-f', output_file,
@@ -75,13 +73,11 @@ class TestCliListener(unittest.TestCase):
                                     'cat scratch\n'],
                                    args, 'PUB')
 
-        arch = open(archive_file, 'r').read()
-        output = open(output_file, 'r').read()
-        self.assertMultiLineEqual(arch, output)
+        self.assertFiles(archive_file, output_file)
 
 
     def _deliver_the_messages(self, msgs=[], args=list(), sock_type='PUSH'):
-        t = self._thread_wrapped_cli_listener(args)
+        t = thread_wrapped_cli_listener(args)
         try:
             t.start()
             self.assertTrue(t.is_alive())
@@ -97,7 +93,7 @@ class TestCliListener(unittest.TestCase):
 
 
     def _deliver_the_message(self, msg=None, args=list(), sock_type='PUSH'):
-        t = self._thread_wrapped_cli_listener(args)
+        t = thread_wrapped_cli_listener(args)
         try:
             t.start()
             self.assertTrue(t.is_alive())
@@ -109,24 +105,3 @@ class TestCliListener(unittest.TestCase):
             self.assertFalse(t.is_alive(),
                              'CliListener instance should have shutdown.')
 
-
-    def _gen_archive_output_pair(self, test_name=None ):
-        archive_file = 'test_data/archive/' + test_name + '._archive'
-        output_file = 'test_out/' + test_name + '._output'
-
-        if os.path.exists(output_file):
-            os.remove(output_file)
-
-        return archive_file, output_file
-
-
-    def _thread_wrapped_cli_listener(self, argv=None):
-        cli_listener = CliListener(argv=argv)
-        self.assertIsNotNone(cli_listener,
-                             'Unable to create instance of CliListener: %s' %
-                             argv)
-
-        t = Thread(target=cli_listener.run)
-        t.cli_listener = cli_listener
-
-        return t
