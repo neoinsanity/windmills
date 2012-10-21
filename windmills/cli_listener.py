@@ -59,7 +59,10 @@ class CliListener(Scaffold):
 
     def configure(self, args=None):
         assert args
-        property_list = ['input_sock_url', 'file']
+        property_list = ['input_sock_url',
+                         'input_sock_type',
+                         'input_sock_filter',
+                         'file']
         self.__copy_property_values__(src=args,
                                       target=self,
                                       property_list=property_list)

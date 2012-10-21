@@ -3,7 +3,7 @@ from threading import Thread
 import time
 import unittest
 from windmills import CliListener
-from zmq import Context, PUSH
+from zmq import Context, PUB, PUSH
 
 
 __author__ = 'neoinsanity'
@@ -12,8 +12,15 @@ __author__ = 'neoinsanity'
 class TestCliListener(unittest.TestCase):
     def setUp(self):
         self.zmq_ctx = Context()
-        self.out_sock = self.zmq_ctx.socket(PUSH)
-        self.out_sock.bind('tcp://*:6678')
+        push_out_sock = self.zmq_ctx.socket(PUSH)
+        push_out_sock.bind('tcp://*:6678')
+        pub_out_sock = self.zmq_ctx.socket(PUB)
+        pub_out_sock.bind('tcp://*:6679')
+
+        self.sock_map = {
+            'PUSH': push_out_sock,
+            'PUB': pub_out_sock
+        }
 
         d = 'test_out'
         if not os.path.exists(d):
@@ -21,44 +28,96 @@ class TestCliListener(unittest.TestCase):
 
 
     def tearDown(self):
-        self.out_sock.close()
+        for sock in self.sock_map.values():
+            sock.close()
 
 
     def test_cli_listener_default_behavior(self):
         t = self._thread_wrapped_cli_listener()
-        t.start()
-        self.assertTrue(t.is_alive(),
-                        'The CliEmitter instance should have started.')
-
-        self.out_sock.send('Hello')
-
-        time.sleep(1)
-
-        t.cli_listener.kill()
-
-        t.join(3)
-        self.assertFalse(t.is_alive(),
-                         'The CliEmitter instance should have shut down.')
+        try:
+            t.start()
+            self.assertTrue(t.is_alive(),
+                            'The CliEmitter instance should have started.')
+            self.sock_map['PUSH'].send('Hello')
+            time.sleep(1)
+        finally:
+            t.cli_listener.kill()
+            t.join(3)
+            self.assertFalse(t.is_alive(),
+                             'The CliEmitter instance should have shut down.')
 
 
     def test_cli_listener_file_option(self):
-        archive_file = 'test_data/archive/cli_listener_file_option._archive'
-        output_file = 'test_out/cli_listener_file_option._output'
-        if os.path.exists(output_file):
-            os.remove(output_file)
+        archive_file, output_file = self._gen_archive_output_pair(
+            'cli_listener_file_option')
+
         args = ['-f', output_file]
-        t = self._thread_wrapped_cli_listener(args)
-        t.start()
-        self.assertTrue(t.is_alive())
-        self.out_sock.send('Goodbye, Yesterday')
-        time.sleep(1)
-        t.cli_listener.kill()
-        t.join(3)
-        self.assertFalse(t.is_alive(),
-                         'CliListener instance should have shutdown.')
+        self._deliver_the_message('Goodbye, Yesterday', args)
+
         arch = open(archive_file, 'r').read()
         output = open(output_file, 'r').read()
         self.assertMultiLineEqual(arch, output)
+
+
+    def test_cli_socket_type_option(self):
+        archive_file, output_file = self._gen_archive_output_pair(
+            'cli_socket_type_option')
+
+        args = ['-f', output_file,
+                '--input_sock_type', 'SUB',
+                '--input_sock_filter', 'cat',
+                '--input_sock_url', 'tcp://localhost:6679']
+
+        self._deliver_the_messages(['throw away\n',
+                                    'dog house\n',
+                                    'cat people\n',
+                                    'dog nap\n',
+                                    'cat scratch\n'],
+                                   args, 'PUB')
+
+        arch = open(archive_file, 'r').read()
+        output = open(output_file, 'r').read()
+        self.assertMultiLineEqual(arch, output)
+
+
+    def _deliver_the_messages(self, msgs=[], args=list(), sock_type='PUSH'):
+        t = self._thread_wrapped_cli_listener(args)
+        try:
+            t.start()
+            self.assertTrue(t.is_alive())
+            for msg in msgs:
+                self.sock_map[sock_type].send(msg)
+                time.sleep(0.5)
+            time.sleep(1)
+        finally:
+            t.cli_listener.kill()
+            t.join(3)
+            self.assertFalse(t.is_alive(),
+                             'CliListener instance should have shutdown.')
+
+
+    def _deliver_the_message(self, msg=None, args=list(), sock_type='PUSH'):
+        t = self._thread_wrapped_cli_listener(args)
+        try:
+            t.start()
+            self.assertTrue(t.is_alive())
+            self.sock_map[sock_type].send(msg)
+            time.sleep(1)
+        finally:
+            t.cli_listener.kill()
+            t.join(3)
+            self.assertFalse(t.is_alive(),
+                             'CliListener instance should have shutdown.')
+
+
+    def _gen_archive_output_pair(self, test_name=None ):
+        archive_file = 'test_data/archive/' + test_name + '._archive'
+        output_file = 'test_out/' + test_name + '._output'
+
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
+        return archive_file, output_file
 
 
     def _thread_wrapped_cli_listener(self, argv=None):
