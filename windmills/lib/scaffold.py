@@ -60,8 +60,7 @@ class Scaffold(Brick):
         >>> assert foo.heartbeat == 5
 
         """
-        if argv is None:
-            raise ValueError("The argv argument is missing.")
+        assert argv
 
         arg_parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
