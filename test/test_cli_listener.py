@@ -1,8 +1,8 @@
 import os
 import time
-from utils_of_test import (gen_archive_output_pair,
-                           thread_wrapped_cli_listener)
-from windmill_test_case import WindmillTestCase
+from test.utils_of_test import (gen_archive_output_pair,
+                                thread_wrap_windmill)
+from test.windmill_test_case import WindmillTestCase
 from zmq import Context, PUB, PUSH
 
 
@@ -33,7 +33,7 @@ class TestCliListener(WindmillTestCase):
 
 
     def test_cli_listener_default_behavior(self):
-        t = thread_wrapped_cli_listener()
+        t = thread_wrap_windmill('CliListener')
         try:
             t.start()
             self.assertTrue(t.is_alive(),
@@ -41,7 +41,7 @@ class TestCliListener(WindmillTestCase):
             self.sock_map['PUSH'].send('Hello')
             time.sleep(1)
         finally:
-            t.cli_listener.kill()
+            t.windmill.kill()
             t.join(3)
             self.assertFalse(t.is_alive(),
                              'The CliEmitter instance should have shut down.')
@@ -77,7 +77,7 @@ class TestCliListener(WindmillTestCase):
 
 
     def _deliver_the_messages(self, msgs=[], args=list(), sock_type='PUSH'):
-        t = thread_wrapped_cli_listener(args)
+        t = thread_wrap_windmill('CliListener', args)
         try:
             t.start()
             self.assertTrue(t.is_alive())
@@ -86,21 +86,21 @@ class TestCliListener(WindmillTestCase):
                 time.sleep(0.5)
             time.sleep(1)
         finally:
-            t.cli_listener.kill()
+            t.windmill.kill()
             t.join(3)
             self.assertFalse(t.is_alive(),
                              'CliListener instance should have shutdown.')
 
 
     def _deliver_the_message(self, msg=None, args=list(), sock_type='PUSH'):
-        t = thread_wrapped_cli_listener(args)
+        t = thread_wrap_windmill('CliListener', args)
         try:
             t.start()
             self.assertTrue(t.is_alive())
             self.sock_map[sock_type].send(msg)
             time.sleep(1)
         finally:
-            t.cli_listener.kill()
+            t.windmill.kill()
             t.join(3)
             self.assertFalse(t.is_alive(),
                              'CliListener instance should have shutdown.')

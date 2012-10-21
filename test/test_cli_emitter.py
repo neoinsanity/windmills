@@ -1,7 +1,7 @@
 import os
 import time
-from windmill_test_case import WindmillTestCase
-from utils_of_test import (gen_archive_output_pair, thread_wrapped_cli_listener)
+from test.windmill_test_case import WindmillTestCase
+from test.utils_of_test import (gen_archive_output_pair, thread_wrap_windmill)
 from windmills import CliEmitter
 
 
@@ -27,7 +27,7 @@ class TestCliEmitter(WindmillTestCase):
         assert emitter
 
         # create the listener and direct it's output to out_file
-        t = thread_wrapped_cli_listener(argv=[
+        t = thread_wrap_windmill('CliListener', argv=[
             '-f', output_file,
             '--input_sock_url', 'tcp://localhost:6677'])
         assert t
@@ -68,7 +68,7 @@ class TestCliEmitter(WindmillTestCase):
         # add the output file to the listener arguments
         listener_args = ['-f', output_file] + listener_args
         # create the listener and direct it's output to out_file
-        t = thread_wrapped_cli_listener(argv=listener_args)
+        t = thread_wrap_windmill('CliListener', argv=listener_args)
         assert t
 
         self.emit_message(emitter, t)
@@ -83,7 +83,7 @@ class TestCliEmitter(WindmillTestCase):
             time.sleep(1)
             emitter.run()
         finally:
-            listener_thread.cli_listener.kill()
+            listener_thread.windmill.kill()
             listener_thread.join(3)
             self.assertFalse(listener_thread.is_alive(),
                              'CliListener instance should have shutdown.')

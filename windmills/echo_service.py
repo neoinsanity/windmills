@@ -11,7 +11,19 @@ __all__ = ['EchoService']
 
 class EchoService(Scaffold):
     """
-
+    >>> from threading import Thread
+    >>> import time
+    >>> arg_list = ['--verbose']
+    >>> foo = EchoService(argv=arg_list)
+    >>> t = Thread(target=foo.run)
+    >>> t.start() # doctest: +ELLIPSIS
+    Beginning run() with state: <...EchoService object at ...>
+    >>> time.sleep(1)
+    >>> assert t.is_alive()
+    >>> foo.kill()
+    >>> t.join(1)
+    Stop flag triggered ... shutting down.
+    >>> assert not t.is_alive()
     """
 
 
@@ -44,3 +56,6 @@ class EchoService(Scaffold):
 
         reply_sock = self.zmq_ctx.socket(REP)
         reply_sock.connect(self.reply_sock_url)
+
+        self.register_input_sock(reply_sock)
+        self.register_output_sock(reply_sock)
