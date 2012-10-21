@@ -19,7 +19,7 @@ class CliListener(Scaffold):
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
     Beginning run() with state: <cli_listener.CliListener object at ...>
-    >>> time.sleep(3)
+    >>> time.sleep(1)
     >>> assert t.is_alive()
     >>> foo.kill()
     >>> t.join(1)
