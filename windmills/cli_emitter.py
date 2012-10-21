@@ -66,7 +66,7 @@ class CliEmitter(Scaffold):
         arg_parser.add_argument('-m', '--message',
                                 default=self.message,
                                 help="The message that the emitter will send "
-                                     "on the output sockeet. If the -f|--file"
+                                     "on the output socket. If the -f|--file"
                                      " flag is used, then this message flag "
                                      "is ignored.")
         arg_parser.add_argument('-r', '--repeat',
@@ -84,7 +84,7 @@ class CliEmitter(Scaffold):
         >>> args = foo.__create_property_bag__()
         >>> args.output_sock_url = 'tcp://*:9998'
         >>> args.delay = 5
-        >>> args.file = '/User/local/someone/somefile'
+        >>> args.file = '/User/local/someone/some_file'
         >>> args.message = 'Welcome to my world'
         >>> args.repeat = True
         >>> foo.configure(args=args)
@@ -114,20 +114,26 @@ class CliEmitter(Scaffold):
 
         """
 
-        if self.file is None:
-            send_method = self._send_msg
-        else:
-            send_method = self._send_file
+        try:
+            if self.file is None:
+                send_method = self._send_msg
+            else:
+                send_method = self._send_file
 
-        if not self.repeat:
-            send_method()
-        else:
-            # todo: raul - need better way to do stop notification
-            while(not self.isStopped()):
+            if not self.repeat:
                 send_method()
+            else:
+                # todo: raul - need better way to do stop notification
+                while(not self.isStopped()):
+                    send_method()
 
-        # give it time to die.
-        time.sleep(1)
+            # give it time to die.
+            time.sleep(1)
+        except Exception, e:
+            print 'Unknown Exception: ', e
+            raise e
+        finally:
+            self.register_output_sock(None) # close the socket use
 
 
     def _send_file(self):
