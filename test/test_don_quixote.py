@@ -68,3 +68,17 @@ class TestDonQuixote(WindmillTestCase):
         assert not t.is_alive()
 
         self.assertFiles(archive_file, output_file)
+
+
+    def test_don_quixote_blueprint_failure(self):
+        # The lack of flie or blueprints argument should raise and exception.
+        try:
+            don = DonQuixote(disable_keyboard=True)
+        except ValueError, e:
+            self.assertEquals(e.message,
+                              'A blueprint dictionary or file with blueprint '
+                              'must be provided.')
+            return
+
+        self.fail("An expected ValueError exception was not captured. Test "
+                  "failed.")
