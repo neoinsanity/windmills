@@ -126,13 +126,15 @@ class DonQuixote(object):
             service_type = service["service"]
             assert service_type
             args = service['args'].split()
-            assert args
 
             the_service = None
 
             service_class = DonQuixote.service_map[service_type]
             assert service_class
-            the_service = service_class(argv=args)
+            if args is not None:
+                the_service = service_class(argv=args)
+            else:
+                the_service = service_class()
 
             assert the_service
 

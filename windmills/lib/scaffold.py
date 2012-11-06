@@ -60,14 +60,15 @@ class Scaffold(Brick):
         >>> assert foo.heartbeat == 5
 
         """
-        assert argv
+        if argv is None:
+            argv = [] # just create an empty arg list
 
         arg_parser = argparse.ArgumentParser(
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
         # if this is the command line args directly, them we need to remove the
         # first argument which is the python execution command. it is
-        if argv[0].endswith('.py'):
+        if len(argv) > 0 and argv[0].endswith('.py'):
             argv.pop(0)
 
         self.__invoke_method_on_bases__(func_name='configuration_options',
