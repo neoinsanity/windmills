@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from lib import Scaffold
-from zmq import REP
+from zmq import POLLIN, RCVMORE, REP, SNDMORE, ZMQError
 
 
 __author__ = 'neoinsanity'
@@ -32,6 +32,10 @@ class EchoService(Scaffold):
         self.reply_sock_url = 'tcp://localhost:8889'
         self.message = None
 
+        # todo: raul - this is cheesy, and needs to be replaced with a more
+        # elegant method of setting the handler.
+        self.input_recv_handler = self._echo_rec_handler
+
         Scaffold.__init__(self, **kwargs)
 
 
@@ -53,9 +57,24 @@ class EchoService(Scaffold):
     def configure(self, args=None):
         assert args
         property_list = ['reply_sock_url', 'message']
+        self.__copy_property_values__(src=args,
+                                      target=self,
+                                      property_list=property_list)
 
         reply_sock = self.zmq_ctx.socket(REP)
         reply_sock.connect(self.reply_sock_url)
 
         self.register_input_sock(reply_sock)
         self.register_output_sock(reply_sock)
+
+
+    def _echo_rec_handler(self, input_sock):
+        msg = input_sock.recv()
+
+        if self.message is None:
+            self._output_sock.send(msg)
+            return msg
+
+        else:
+            self._output_sock.send(self.message)
+            return self.message

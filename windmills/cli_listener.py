@@ -35,6 +35,10 @@ class CliListener(Scaffold):
         self.input_sock_filter = ""
         self.file = None
 
+        # todo: raul - this is cheesy, and needs to be replaced with a more
+        # elegant method of setting the handler.
+        self.input_recv_handler = self._listener_recv_handler
+
         Scaffold.__init__(self, **kwargs)
 
 
@@ -79,15 +83,6 @@ class CliListener(Scaffold):
 
         pull_socket.connect(self.input_sock_url)
         self.register_input_sock(pull_socket)
-
-        #todo: raul - find a better way to do socket.recv handling registring
-        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # self._input_recv_handler is defined in the Cornerstone class.
-        #Override with out own listener
-        args.recv = '_listener_recv_handler'
-
-        #self._input_recv_handler = self._listener_recv_handler
-        # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         if self.verbose:
             print 'CliListener configured...'

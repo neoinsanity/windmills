@@ -13,7 +13,7 @@ Configuration options provided by the Cornerstone class.
 from miller import Miller
 import signal
 import sys
-from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
+from zmq import (Context, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
                  SUBSCRIBE, ZMQError)
 
 
@@ -84,8 +84,8 @@ class Cornerstone(Miller):
         self.zmq_ctx = Context()
 
         # set the default input receive handler, if none has been assigned
-        if not hasattr(self, '_input_recv_handler'):
-            self._input_recv_handler = self._default_recv_handler
+        if not hasattr(self, 'input_recv_handler'):
+            self.input_recv_handler = self._default_recv_handler
 
         # set the default handler, if none has been assigned.
         if not hasattr(self, '_command_handler'):
@@ -116,7 +116,7 @@ class Cornerstone(Miller):
         >>> foo.configuration_options(arg_parser=parser)
         >>> args = parser.print_usage() # doctest: +NORMALIZE_WHITESPACE
         usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]\
- [--verbose] [--recv RECV]
+ [--verbose]
         """
         assert arg_parser
 
@@ -132,9 +132,6 @@ class Cornerstone(Miller):
                                 action="store_true",
                                 help='Enable verbose log output. Useful for '
                                      'debugging.')
-        arg_parser.add_argument('--recv',
-                                default="_default_recv_handler",
-                                help="The method to call on receive")
 
 
     def configure(self, args=None):
@@ -163,13 +160,6 @@ class Cornerstone(Miller):
             self.monitor_stream = args.monitor_stream
         if hasattr(args, 'verbose'):
             self.verbose = args.verbose
-        if hasattr(args, 'recv'):
-            if not hasattr(self, args.recv):
-                print ('Invalid receive listener: %s on %s'
-                       % (args.recv, self))
-                exit(-1)
-            else:
-                self._input_recv_handler = getattr(self, args.recv)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -295,7 +285,7 @@ class Cornerstone(Miller):
                 if self._input_sock and socks.get(self._input_sock) == POLLIN:
                     #todo: raul - this whole section needs to be redone,
                     # see additional comment AAA above.
-                    msg = self._input_recv_handler(self._input_sock)
+                    msg = self.input_recv_handler(self._input_sock)
                     input_count += 1
                     if self.monitor_stream and (input_count % 10) == 0:
                         print '.', input_count, '-', msg
