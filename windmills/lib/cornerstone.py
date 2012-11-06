@@ -13,8 +13,8 @@ Configuration options provided by the Cornerstone class.
 from miller import Miller
 import signal
 import sys
-from zmq import (Context, Poller, POLLIN, RCVMORE, SNDMORE, SUB,
-                 SUBSCRIBE, ZMQError)
+from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE,
+                 SUB, SUBSCRIBE, ZMQError)
 
 
 __author__ = 'neoinsanity'
@@ -73,6 +73,10 @@ class Cornerstone(Miller):
         self._output_sock = None
         self._control_sock = None
 
+        # determine if outgoing messages should enable NOBLOCK on send
+        # default behaviour is to block on a send call till receiver is present
+        self.no_block_send = False
+
         # configure the interrupt handling
         self._stop = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
@@ -115,8 +119,8 @@ class Cornerstone(Miller):
         >>> foo = Cornerstone()
         >>> foo.configuration_options(arg_parser=parser)
         >>> args = parser.print_usage() # doctest: +NORMALIZE_WHITESPACE
-        usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]\
- [--verbose]
+        usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]
+                  [--no_block_send] [--verbose]
         """
         assert arg_parser
 
@@ -128,6 +132,11 @@ class Cornerstone(Miller):
         arg_parser.add_argument('--monitor_stream',
                                 action='store_true',
                                 help='Enable the sampling of message flow.')
+        arg_parser.add_argument('--no_block_send',
+                                action='store_true',
+                                help='Enable NOBLOCK on the sending of messages.'
+                                     ' This will cause an message to be dropped '
+                                     'if no receiver is present.')
         arg_parser.add_argument('--verbose',
                                 action="store_true",
                                 help='Enable verbose log output. Useful for '
@@ -154,12 +163,12 @@ class Cornerstone(Miller):
         >>> assert foo.verbose == True
         """
         assert args
-        if hasattr(args, 'heartbeat'):
-            self.heartbeat = args.heartbeat
-        if hasattr(args, 'monitor_stream'):
-            self.monitor_stream = args.monitor_stream
-        if hasattr(args, 'verbose'):
-            self.verbose = args.verbose
+
+        property_list = ['heartbeat', 'monitor_stream',
+                         'no_block_send', 'verbose']
+        self.__copy_property_values__(src=args,
+                                      target=self,
+                                      property_list=property_list)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -252,7 +261,14 @@ class Cornerstone(Miller):
 
     def send(self, msg):
         assert msg
-        self._output_sock.send(msg)
+        if not self.no_block_send:
+            self._output_sock.send(msg)
+        else:
+            try:
+                self._output_sock.send(msg, NOBLOCK)
+            except:
+                if self.verbose:
+                    print "Unexpected error:", sys.exc_info()[0]
 
 
     def isStopped(self):
