@@ -149,26 +149,9 @@ class Cornerstone(Miller):
         prior to the invocation of start.
 
         Keyword Arguments:
-        args - an object with attributes set to the argument values.
-
-        Example Usage:
-        >>> foo = Cornerstone()
-        >>> args = foo.__create_property_bag__()
-        >>> args.heartbeat = 5
-        >>> args.monitor_stream = True
-        >>> args.verbose = True
-        >>> foo.configure(args=args)
-        >>> assert foo.heartbeat == 5
-        >>> assert foo.monitor_stream == True
-        >>> assert foo.verbose == True
+        args - an object with attributes set to the argument values.e
         """
         assert args
-
-        property_list = ['heartbeat', 'monitor_stream',
-                         'no_block_send', 'verbose']
-        self.__copy_property_values__(src=args,
-                                      target=self,
-                                      property_list=property_list)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -23,6 +23,7 @@ class CliEmitter(Scaffold):
     >>> from zmq import PULL
     >>> arg_list = ['--verbose', '--output_sock_url', 'tcp://*:9999']
     >>> foo = CliEmitter(argv=arg_list)
+    CliEmitter configured...
     >>> input_sock = foo.zmq_ctx.socket(PULL)
     >>> input_sock.connect('tcp://localhost:9999')
     >>> foo.run()
@@ -79,27 +80,7 @@ class CliEmitter(Scaffold):
 
 
     def configure(self, args=None):
-        """
-        >>> foo = CliEmitter()
-        >>> args = foo.__create_property_bag__()
-        >>> args.output_sock_url = 'tcp://*:9998'
-        >>> args.delay = 5
-        >>> args.file = '/User/local/someone/some_file'
-        >>> args.message = 'Welcome to my world'
-        >>> args.repeat = True
-        >>> foo.configure(args=args)
-        >>> assert foo.output_sock_url == args.output_sock_url
-        >>> assert foo.delay == args.delay
-        >>> assert foo.file == args.file
-        >>> assert foo.message == args.message
-        >>> assert foo.repeat == args.repeat
-        """
         assert args
-        property_list = ['output_sock_url', 'delay', 'file', 'message',
-                         'repeat']
-        self.__copy_property_values__(src=args,
-                                      target=self,
-                                      property_list=property_list)
 
         push_socket = self.zmq_ctx.socket(PUSH)
         push_socket.bind(self.output_sock_url)

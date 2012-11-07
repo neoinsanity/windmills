@@ -56,10 +56,6 @@ class EchoService(Scaffold):
 
     def configure(self, args=None):
         assert args
-        property_list = ['reply_sock_url', 'message']
-        self.__copy_property_values__(src=args,
-                                      target=self,
-                                      property_list=property_list)
 
         reply_sock = self.zmq_ctx.socket(REP)
         reply_sock.connect(self.reply_sock_url)

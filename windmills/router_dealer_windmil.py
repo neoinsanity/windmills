@@ -40,8 +40,6 @@ class RouterDealerWindmill(Scaffold):
 
     def configure(self, args=None):
         assert args
-        property_list = ['router_sock_url', 'dealer_sock_url']
-        self.__copy_property_values__(args, self, property_list=property_list)
 
         router_sock = self.zmq_ctx.socket(ROUTER)
         router_sock.bind(self.router_sock_url)

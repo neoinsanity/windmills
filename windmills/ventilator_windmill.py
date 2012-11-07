@@ -62,10 +62,6 @@ class VentilatorWindmill(Scaffold):
 
     def configure(self, args=None):
         assert args
-        self.input_sock_url = args.input_sock_url
-        self.output_sock_url = args.output_sock_url
-        self.input_sock_type = args.input_sock_type
-        self.output_sock_type = args.output_sock_type
 
         pull_socket = self.zmq_ctx.socket(getattr(zmq, self.input_sock_type))
         pull_socket.connect(self.input_sock_url)

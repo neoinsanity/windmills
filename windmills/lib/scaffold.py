@@ -71,9 +71,19 @@ class Scaffold(Brick):
         if len(argv) > 0 and argv[0].endswith('.py'):
             argv.pop(0)
 
+        # gather argument options
         self.__invoke_method_on_bases__(func_name='configuration_options',
                                         arg_parser=arg_parser)
+        property_list = []
+        for action in arg_parser._get_optional_actions():
+            property_list.append(action.dest)
+        property_list.remove('help') # remove the help option, as it is not necessary
         self._args = arg_parser.parse_args(argv)
-        #todo: raul - iterate over args attrs to set on self
+        # map the properties to attributes assigned self instance
+        self.__copy_property_values__(src=self._args,
+                                      target=self,
+                                      property_list=property_list)
+        # now execute the configuration call on each base class
+        # in the class inheritance chain
         self.__invoke_method_on_bases__(func_name='configure',
                                         args=self._args)

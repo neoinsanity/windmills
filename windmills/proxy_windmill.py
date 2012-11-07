@@ -55,10 +55,6 @@ class ProxyWindmill(Scaffold):
 
     def configure(self, args=None):
         assert args
-        property_list = ['input_sock_url',
-                         'input_sock_filter',
-                         'output_sock_filter']
-        self.__copy_property_values__(args, self, property_list=property_list)
 
         sub_socket = self.zmq_ctx.socket(SUB)
         sub_socket.connect(self.input_sock_url)
