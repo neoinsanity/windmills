@@ -23,8 +23,7 @@ class TestVentilatorWindmill(WindmillTestCase):
 
         don = DonQuixote(
             file='test_data/blueprints/ventilator_default_behavior.blueprint',
-            disable_keyboard=True
-        )
+            disable_keyboard=True)
 
         t = Thread(target=don.run)
         t.start()
