@@ -30,6 +30,49 @@ class Miller(object):
         return type('_property_bag', (object,), dict())
 
 
+    def __copy_property_values__(self,
+                                 src=None,
+                                 target=None,
+                                 property_list=None ):
+        """
+        The __copy_property_value__ method copies the property values in a
+        given list from a given source object to a target source object.
+
+        Keyword Args:
+        src -- The source object that is to be inspected for property values.
+        target -- The target object that will be modified with found values.
+        property_list -- A list of property names which are to be copied.
+
+        The __copy_property_values__ method will only copy the values from
+        src when the propery is found. In cases where a property value is not
+        found in the src object, then no change to the target object is made.
+
+        Example Usage:
+        >>> foo = Miller()
+        >>> src = foo.__create_property_bag__()
+        >>> src.property1 = 1
+        >>> src.property2 = 2
+        >>> src.property3 = 3
+        >>> src.property4 = 4
+        >>> target = foo.__create_property_bag__()
+        >>> property_list = ['property1', 'property2', 'property3', 'un_set']
+        >>> foo.__copy_property_values__(
+        ...     src=src, target=target, property_list=property_list)
+        >>> assert hasattr(target, 'property1')
+        >>> assert hasattr(target, 'property2')
+        >>> assert hasattr(target, 'property3')
+        >>> assert not hasattr(target, 'property4') # not in property_list
+        >>> assert not hasattr(target, 'un_set') # property not in src
+        """
+        assert src
+        assert target
+        assert property_list is not None
+
+        for property_name in property_list:
+            if hasattr(src, property_name):
+                setattr(target, property_name, getattr(src, property_name))
+
+
     def __invoke_method_on_bases__(self, func_name=None, *args, **kwargs):
         """
         This helper method will walk the base class hierarchy to invoke a
@@ -94,45 +137,15 @@ class Miller(object):
             base = base.__base__ # iterate to the next base class
 
 
-    def __copy_property_values__(self,
-                                 src=None,
-                                 target=None,
-                                 property_list=None ):
+    def __set_attrs__(self, target, attr_list):
         """
-        The __copy_property_value__ method copies the property values in a
-        given list from a given source object to a target source object.
-
-        Keyword Args:
-        src -- The source object that is to be inspected for property values.
-        target -- The target object that will be modified with found values.
-        property_list -- A list of property names which are to be copied.
-
-        The __copy_property_values__ method will only copy the values from
-        src when the propery is found. In cases where a property value is not
-        found in the src object, then no change to the target object is made.
-
-        Example Usage:
+        This method takes a list of name/value tuples
         >>> foo = Miller()
-        >>> src = foo.__create_property_bag__()
-        >>> src.property1 = 1
-        >>> src.property2 = 2
-        >>> src.property3 = 3
-        >>> src.property4 = 4
-        >>> target = foo.__create_property_bag__()
-        >>> property_list = ['property1', 'property2', 'property3', 'un_set']
-        >>> foo.__copy_property_values__(
-        ...     src=src, target=target, property_list=property_list)
-        >>> assert hasattr(target, 'property1')
-        >>> assert hasattr(target, 'property2')
-        >>> assert hasattr(target, 'property3')
-        >>> assert not hasattr(target, 'property4') # not in property_list
-        >>> assert not hasattr(target, 'un_set') # property not in src
+        >>> attr_list = [('some_attr', 'some_value'),('int_attr', 1)]
+        >>> foo.__set_attrs__(foo, attr_list)
+        >>> assert foo.some_attr == 'some_value'
+        >>> assert foo.int_attr == 1
         """
-        assert src
-        assert target
-        assert property_list is not None
-
-        for property_name in property_list:
-            if hasattr(src, property_name):
-                setattr(target, property_name, getattr(src, property_name))
-
+        for (name, value) in attr_list:
+            if not hasattr(target, name):
+                setattr(target, name, value)

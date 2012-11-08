@@ -2,14 +2,14 @@
 options for the construction of *-windmill and app devices.
 """
 import argparse
-from brick import Brick
+from miller import Miller
 
 
 __author__ = 'neoinsanity'
 __all__ = ['Scaffold']
 
 
-class Scaffold(Brick):
+class Scaffold(Miller):
     """
     The Scaffold class is a helper mix-in that evaluates sys.argv into options
     settings for execution of windmill devices.
@@ -35,8 +35,6 @@ class Scaffold(Brick):
 
 
     def __init__(self, **kwargs):
-        Brick.__init__(self, **kwargs)
-
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs and kwargs.get('argv') is not None:
             self._execute_configuration(kwargs['argv'])
@@ -45,6 +43,16 @@ class Scaffold(Brick):
             self.__invoke_method_on_bases__(func_name='configure',
                                             args=empty_args)
 
+
+    def configuration_options(self, arg_parser=None):
+        arg_parser.add_argument('--verbose',
+                                action="store_true",
+                                help='Enable verbose log output. Useful for '
+                                     'debugging.')
+
+
+    def configuration(self, args=None):
+        assert args
 
     def _execute_configuration(self, argv=None):
         """
@@ -55,9 +63,9 @@ class Scaffold(Brick):
         >>> foo = Scaffold()
         >>> argv = [
         ... '/Users/neoinsanity/samples/samples/my-argparse/simpe_argparse.py',
-        ... '--heartbeat', '5']
+        ... '--verbose']
         >>> foo._execute_configuration(argv=argv)
-        >>> assert foo.heartbeat == 5
+        >>> assert foo.verbose == True
 
         """
         if argv is None:

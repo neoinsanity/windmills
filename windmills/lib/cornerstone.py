@@ -10,7 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from miller import Miller
+from scaffold import Scaffold
 import signal
 import sys
 from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE,
@@ -21,7 +21,7 @@ __author__ = 'neoinsanity'
 __all__ = ['Cornerstone']
 
 
-class Cornerstone(Miller):
+class Cornerstone(Scaffold):
     """ Cornerstone can be used to create a 0mq poll loop.
 
     Upon creation of a Cornerstone instance, the initial state of the instance
@@ -104,6 +104,8 @@ class Cornerstone(Miller):
         # monitoring of message stream is off by default
         self.monitor_stream = False
 
+        Scaffold.__init__(self, **kwargs)
+
 
     def configuration_options(self, arg_parser=None):
         """
@@ -120,7 +122,7 @@ class Cornerstone(Miller):
         >>> foo.configuration_options(arg_parser=parser)
         >>> args = parser.print_usage() # doctest: +NORMALIZE_WHITESPACE
         usage: app.py [-h] [--heartbeat HEARTBEAT] [--monitor_stream]
-                  [--no_block_send] [--verbose]
+                  [--no_block_send]
         """
         assert arg_parser
 
@@ -137,10 +139,6 @@ class Cornerstone(Miller):
                                 help='Enable NOBLOCK on the sending of messages.'
                                      ' This will cause an message to be dropped '
                                      'if no receiver is present.')
-        arg_parser.add_argument('--verbose',
-                                action="store_true",
-                                help='Enable verbose log output. Useful for '
-                                     'debugging.')
 
 
     def configure(self, args=None):

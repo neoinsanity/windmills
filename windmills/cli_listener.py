@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Scaffold
+from lib import Cornerstone
 import sys
 from zmq import PULL, SUB, SUBSCRIBE
 
@@ -10,7 +10,7 @@ __all__ = ['CliListener']
 # cli-listener
 #
 
-class CliListener(Scaffold):
+class CliListener(Cornerstone):
     """
     >>> from threading import Thread
     >>> import time
@@ -39,7 +39,7 @@ class CliListener(Scaffold):
         # elegant method of setting the handler.
         self.input_recv_handler = self._listener_recv_handler
 
-        Scaffold.__init__(self, **kwargs)
+        Cornerstone.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):

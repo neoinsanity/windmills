@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from lib import Scaffold
-from zmq import POLLIN, RCVMORE, REP, SNDMORE, ZMQError
+from lib import Cornerstone
+from zmq import   REP
 
 
 __author__ = 'neoinsanity'
@@ -9,7 +9,7 @@ __all__ = ['EchoService']
 # echo-windmill
 #
 
-class EchoService(Scaffold):
+class EchoService(Cornerstone):
     """
     >>> from threading import Thread
     >>> import time
@@ -36,7 +36,7 @@ class EchoService(Scaffold):
         # elegant method of setting the handler.
         self.input_recv_handler = self._echo_rec_handler
 
-        Scaffold.__init__(self, **kwargs)
+        Cornerstone.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):

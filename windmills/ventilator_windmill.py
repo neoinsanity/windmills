@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Scaffold
+from lib import Cornerstone
 import sys
 import zmq
 
@@ -10,7 +10,7 @@ __all__ = ['VentilatorWindmill']
 # ventilator-windmill()
 #
 
-class VentilatorWindmill(Scaffold):
+class VentilatorWindmill(Cornerstone):
     """
     >>> from threading import Thread
     >>> import time
@@ -37,7 +37,7 @@ class VentilatorWindmill(Scaffold):
         self.output_sock_url = 'tcp://*:6678'
         self.output_sock_type = "PUSH"
 
-        Scaffold.__init__(self, **kwargs)
+        Cornerstone.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):

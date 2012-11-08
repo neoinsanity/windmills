@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Scaffold
+from lib import Brick
 import sys
 import time
 from zmq import PUSH
@@ -16,18 +16,19 @@ __all__ = ['CliEmitter']
 # cli-emitter
 #
 
-class CliEmitter(Scaffold):
+class CliEmitter(Brick):
     """
     >>> from threading import Thread
     >>> import time
     >>> from zmq import PULL
-    >>> arg_list = ['--verbose', '--output_sock_url', 'tcp://*:9999']
+    >>> arg_list = ['--verbose', '--output_sock_url', 'tcp://*:9998']
     >>> foo = CliEmitter(argv=arg_list)
     CliEmitter configured...
     >>> input_sock = foo.zmq_ctx.socket(PULL)
     >>> input_sock.connect('tcp://localhost:9999')
     >>> foo.run()
     >>> msg = input_sock.recv()
+    >>> input_sock.close()
     >>> print msg
     Testing 1, 2, 3
     """
@@ -42,15 +43,11 @@ class CliEmitter(Scaffold):
         self.message = 'Testing 1, 2, 3'
         self.repeat = False
 
-        Scaffold.__init__(self, **kwargs)
+        Brick.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):
         assert arg_parser
-        arg_parser.add_argument('--output_sock_url',
-                                default=self.output_sock_url,
-                                help='The url that emitter will bind and push'
-                                     ' messages')
         arg_parser.add_argument('-d', '--delay',
                                 type=int,
                                 default=self.delay,
@@ -81,10 +78,6 @@ class CliEmitter(Scaffold):
 
     def configure(self, args=None):
         assert args
-
-        push_socket = self.zmq_ctx.socket(PUSH)
-        push_socket.bind(self.output_sock_url)
-        self.register_output_sock(push_socket)
 
         if self.verbose:
             print 'CliEmitter configured...'
