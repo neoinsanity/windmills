@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Cornerstone
+from lib import Brick
 import sys
 from zmq import PULL, SUB, SUBSCRIBE
 
@@ -10,12 +10,13 @@ __all__ = ['CliListener']
 # cli-listener
 #
 
-class CliListener(Cornerstone):
+class CliListener(Brick):
     """
     >>> from threading import Thread
     >>> import time
     >>> arg_list = ['--verbose']
     >>> foo = CliListener(argv=arg_list)
+    CliListener configured...
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
     Beginning run() with state: <cli_listener.CliListener object at ...>
@@ -30,32 +31,18 @@ class CliListener(Cornerstone):
 
     def __init__(self, **kwargs):
         # setup the initial default configuration
-        self.input_sock_url = "tcp://localhost:6678"
-        self.input_sock_type = 'PULL'
-        self.input_sock_filter = ""
         self.file = None
 
         # todo: raul - this is cheesy, and needs to be replaced with a more
         # elegant method of setting the handler.
         self.input_recv_handler = self._listener_recv_handler
 
-        Cornerstone.__init__(self, **kwargs)
+        self.CONFIGURE_OUTPUT = False # Signal Brick not to configure output socket
+        Brick.__init__(self, **kwargs)
 
 
     def configuration_options(self, arg_parser=None):
         assert arg_parser
-        arg_parser.add_argument('--input_sock_url',
-                                default=self.input_sock_url,
-                                help='The url that the listener will pull '
-                                     'from to print out messages')
-        arg_parser.add_argument('--input_sock_type',
-                                default=self.input_sock_type,
-                                help='The type of socket to create. ('
-                                     'PULL|SUB)')
-        arg_parser.add_argument('--input_sock_filter',
-                                default=self.input_sock_filter,
-                                help='The filter argument is only valid if '
-                                     'the input_sock_type is set to SUB.')
         arg_parser.add_argument('-f', '--file',
                                 help='A file to append incoming messages by '
                                      'line.')
@@ -66,16 +53,6 @@ class CliListener(Cornerstone):
 
         if self.file is not None:
             self._file = open(self.file, 'w')
-
-        sock_type = PULL
-        if self.input_sock_type == 'SUB':
-            sock_type = SUB
-        pull_socket = self.zmq_ctx.socket(sock_type)
-        if sock_type == SUB:
-            pull_socket.setsockopt(SUBSCRIBE, self.input_sock_filter)
-
-        pull_socket.connect(self.input_sock_url)
-        self.register_input_sock(pull_socket)
 
         if self.verbose:
             print 'CliListener configured...'

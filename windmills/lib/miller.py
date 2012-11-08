@@ -137,12 +137,14 @@ class Miller(object):
             base = base.__base__ # iterate to the next base class
 
 
-    def __set_attrs__(self, target, attr_list):
+    def __set_unassigned_attrs__(self, target, attr_list):
         """
-        This method takes a list of name/value tuples
+        This method takes a list of name/value tuples and assigns the property and
+        value to the given target, if the property does not exist.
+
         >>> foo = Miller()
         >>> attr_list = [('some_attr', 'some_value'),('int_attr', 1)]
-        >>> foo.__set_attrs__(foo, attr_list)
+        >>> foo.__set_unassigned_attrs__(foo, attr_list)
         >>> assert foo.some_attr == 'some_value'
         >>> assert foo.int_attr == 1
         """
