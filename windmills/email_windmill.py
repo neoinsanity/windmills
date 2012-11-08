@@ -35,11 +35,18 @@ class EmailWindmill(Brick):
 
     def __init__(self, **kwargs):
         # !!!!! todo: raul - replace with real configurable logging !!!!!
-        log_level = kwargs.get('verbose', logging.ERROR)
-        logging.basicConfig(filename='/tmp/email.log', level=log_level)
+        verbose = kwargs.get('verbose', False)
+        log_level = logging.ERROR
+        if verbose:
+            log_level = logging.DEBUG
+        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            filename='/tmp/email_windmill.log',
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=log_level)
         self.log = logging.getLogger('EmailWindmill')
-
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         # setup the initial default configuration
         self.user_name = self.SENDGRID_USERNAME
         self.password = self.SENDGRID_PASSWORD
