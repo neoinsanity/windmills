@@ -1,0 +1,12 @@
+{"blueprints":[
+{
+    "service":"cli_emitter",
+    "args":"-f test_data/inputs/test_ventilator_default_behavior._input --output_sock_url tcp://*:6687 -d 0 --verbose"
+},
+{
+    "service":"ventilator_windmill", "args":"--input_sock_url tcp://localhost:6687 --output_sock_url tcp://*:6688  --verbose --monitor_stream"},
+{
+    "service":"cli_listener",
+    "args":"-f test_out/test_ventilator_default_behavior._output --input_sock_url tcp://localhost:6688"
+}
+]}

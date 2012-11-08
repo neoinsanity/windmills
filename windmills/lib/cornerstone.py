@@ -78,7 +78,8 @@ class Cornerstone(Scaffold):
         self.no_block_send = False
 
         # configure the interrupt handling
-        self._stop = False
+        self._stop = True
+        self._running = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         # a regular hearbeat interval must be set to the default.
@@ -265,6 +266,7 @@ class Cornerstone(Scaffold):
         mechanism for transmitting the data out to a registered handler.
         """
         self._stop = False
+        self._running = True
 
         if self.verbose:
             print 'Beginning run() with state:', str(self)
@@ -310,6 +312,7 @@ class Cornerstone(Scaffold):
         # close the sockets held by the poller
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
+        self._running = False
 
 
     def kill(self):
@@ -318,6 +321,11 @@ class Cornerstone(Scaffold):
         invoked.
         """
         self._stop = True
+
+        # ensure all sockets are closed, in the event of socket configuration but no execution of run loop.
+#        if not self._running:
+#            self.register_input_sock(sock=None)
+#            self.register_output_sock(sock=None)
 
 
     def _signal_interrupt_handler(self, signum, frame):

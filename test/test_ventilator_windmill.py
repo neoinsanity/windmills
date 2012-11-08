@@ -1,6 +1,6 @@
 import time
 from test import WindmillTestCase
-from test.utils_of_test import gen_archive_output_pair
+from test.utils_of_test import gen_archive_output_blueprint_triad
 from threading import Thread
 from windmills import  DonQuixote
 
@@ -18,17 +18,18 @@ class TestVentilatorWindmill(WindmillTestCase):
 
 
     def test_ventilator_default_behavior(self):
-        archive_file, output_file = gen_archive_output_pair(
+        archive_file, output_file, blueprint = gen_archive_output_blueprint_triad(
             'test_ventilator_default_behavior')
 
         don = DonQuixote(
-            file='test_data/blueprints/ventilator_default_behavior.blueprint',
+            file=blueprint,
             disable_keyboard=True)
 
         t = Thread(target=don.run)
         t.start()
-        time.sleep(2)
+        time.sleep(1)
         assert t.is_alive()
+        time.sleep(3)
         don.kill()
         t.join(3)
         assert not t.is_alive()

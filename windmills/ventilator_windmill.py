@@ -31,10 +31,11 @@ class VentilatorWindmill(Brick):
 
     def __init__(self, **kwargs):
         # set up the initial default configuration
-        self.input_sock_url = 'tcp://localhost:6677'
+        self.input_sock_url = 'tcp://localhost:6687'
         self.input_sock_type = "PULL"
+        #self.input_bind = True
 
-        self.output_sock_url = 'tcp://*:6678'
+        self.output_sock_url = 'tcp://*:6688'
         self.output_sock_type = "PUSH"
 
         Brick.__init__(self, **kwargs)
