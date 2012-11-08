@@ -6,6 +6,7 @@ from schematics.types.compound import ListType
 from smtplib import SMTP, SMTPAuthenticationError, SMTPServerDisconnected
 from windmills.lib import Brick
 import json
+import logging
 import os
 import schematics.base
 import socket
@@ -33,6 +34,12 @@ class EmailWindmill(Brick):
 
 
     def __init__(self, **kwargs):
+        # !!!!! todo: raul - replace with real configurable logging !!!!!
+        log_level = kwargs.get('verbose', logging.ERROR)
+        logging.basicConfig(filename='/tmp/email.log', level=log_level)
+        self.log = logging.getLogger('EmailWindmill')
+
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # setup the initial default configuration
         self.user_name = self.SENDGRID_USERNAME
         self.password = self.SENDGRID_PASSWORD
@@ -54,7 +61,7 @@ class EmailWindmill(Brick):
         assert args
 
         if self.verbose:
-            print 'EmailWindmill configured...'
+            self.log.info('EmailWindmill configured...')
 
 
     def _email_recv_handler(self, sock):
@@ -72,8 +79,8 @@ class EmailWindmill(Brick):
             try:
                 validator.validate(validate_all=True)
             except schematics.base.ModelException, e:
-                print('schematics.base.ModelException: %s, while processing %s'
-                      % (e, payload))
+                self.log.error('schematics.base.ModelException: %s, while processing %s'
+                               % (e, payload))
                 return
 
             sender = payload['sender']
@@ -91,19 +98,19 @@ class EmailWindmill(Brick):
             mail_client.quit()
 
         except AttributeError, e:
-            print('AttributeError: %s, while processing: %s' % (e, request_json))
+            self.log.error('AttributeError: %s, while processing: %s' % (e, request_json))
         except SMTPAuthenticationError, e:
-            print('SMTPAuthenticationError: %s' % e)
+            self.log.error('SMTPAuthenticationError: %s' % e)
         except SMTPServerDisconnected, e:
-            print('SMTPServerDisconnected: %s' % e)
+            self.log.error('SMTPServerDisconnected: %s' % e)
         except socket.error, e:
-            print('socket.error: %s' % e)
+            self.log.error('socket.error: %s' % e)
         except TypeError, e:
-            print('TypeError: %s, while processing: %s' % (e, request_json))
+            self.log.error('TypeError: %s, while processing: %s' % (e, request_json))
         except ValueError, e:
-            print('ValueError: %s, while processing: %s' % (e, request_json))
+            self.log.error('ValueError: %s, while processing: %s' % (e, request_json))
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            self.log.error("Unexpected error:", sys.exc_info()[0])
 
 
 if __name__ == '__main__':
