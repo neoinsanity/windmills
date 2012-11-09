@@ -2,7 +2,7 @@
 output sockets for 0mq device and service patterns.
 """
 from cornerstone import Cornerstone
-from zmq import PULL, PUSH, SUB, SUBSCRIBE
+from zmq import PUB, PULL, PUSH, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
@@ -63,8 +63,7 @@ class Brick(Cornerstone):
                                          'from to print out messages')
             arg_parser.add_argument('--input_sock_type',
                                     default=self.input_sock_type,
-                                    help='The type of socket to create. ('
-                                         'PULL|SUB)')
+                                    help='The type of socket to create. (PULL|SUB)')
             arg_parser.add_argument('--input_sock_filter',
                                     default=self.input_sock_filter,
                                     help='The filter argument is only valid if '
@@ -82,10 +81,13 @@ class Brick(Cornerstone):
                                     default=self.output_sock_url,
                                     help='The url that emitter will bind and push'
                                          ' messages')
+            arg_parser.add_argument('--output_sock_type',
+                                    default=self.output_sock_type,
+                                    help='The type of socket to create, (PUSH|PUB')
             arg_parser.add_argument('--output_connect',
                                     default=self.output_connect,
                                     action='store_true',
-                                    help='Configure the input to bind rather '
+                                    help='Configure the output to connect rather '
                                          'than bind on the output url')
 
 
@@ -111,7 +113,10 @@ class Brick(Cornerstone):
 
         # configure output socket to include the socket option settings
         if self.CONFIGURE_OUTPUT:
-            output_socket = self.zmq_ctx.socket(PUSH)
+            sock_type = PUSH
+            if self.output_sock_type == 'PUB':
+                sock_type = PUB
+            output_socket = self.zmq_ctx.socket(sock_type)
 
             if self.output_connect:
                 output_socket.connect(self.output_sock_url)

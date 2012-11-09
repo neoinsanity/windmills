@@ -18,8 +18,18 @@ class TestVentilatorWindmill(WindmillTestCase):
 
 
     def test_ventilator_default_behavior(self):
+        self._executor('test_ventilator_default_behavior')
+
+
+    def test_ventilator_sub_push_behavior(self):
+        self._executor('test_ventilator_sub_push_behavior')
+
+
+    def _executor(self, test_name=None, stall=None):
+        assert test_name
+
         archive_file, output_file, blueprint = gen_archive_output_blueprint_triad(
-            'test_ventilator_default_behavior')
+            test_name)
 
         don = DonQuixote(
             file=blueprint,
@@ -30,9 +40,10 @@ class TestVentilatorWindmill(WindmillTestCase):
         time.sleep(1)
         assert t.is_alive()
         time.sleep(1)
+        if stall:
+            time.sleep(stall)
         don.kill()
         t.join(3)
         assert not t.is_alive()
 
         self.assertFiles(archive_file, output_file)
-

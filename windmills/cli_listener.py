@@ -74,6 +74,8 @@ class CliListener(Brick):
             self._file.write(msg)
             self._file.flush()
 
+        return msg
+
 
 if __name__ == '__main__':
     argv = sys.argv
