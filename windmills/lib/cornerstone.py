@@ -253,6 +253,10 @@ class Cornerstone(Scaffold):
                     print "Unexpected error:", sys.exc_info()[0]
 
 
+    def setRun(self):
+        self._stop = False
+
+
     def isStopped(self):
         return self._stop
 
@@ -269,7 +273,7 @@ class Cornerstone(Scaffold):
         self._running = True
 
         if self.verbose:
-            print 'Beginning run() with state:', str(self)
+            print 'Beginning run() with state:', str(self), 'and configuration: ', self._args
 
         loop_count = 0
         input_count = 0
@@ -286,7 +290,7 @@ class Cornerstone(Scaffold):
                     # see additional comment AAA above.
                     msg = self.input_recv_handler(self._input_sock)
                     input_count += 1
-                    if self.monitor_stream and (input_count % 10) == 0:
+                    if self.monitor_stream: # and (input_count % 10) == 0:
                         print '.', input_count, '-', msg
 
                 if (self._control_sock and
@@ -314,6 +318,9 @@ class Cornerstone(Scaffold):
         self.register_output_sock(sock=None)
         self._running = False
 
+        if self.verbose:
+            print 'Shut down', self.__class__.__name__, '...'
+
 
     def kill(self):
         """
@@ -323,9 +330,11 @@ class Cornerstone(Scaffold):
         self._stop = True
 
         # ensure all sockets are closed, in the event of socket configuration but no execution of run loop.
-#        if not self._running:
-#            self.register_input_sock(sock=None)
-#            self.register_output_sock(sock=None)
+
+
+    #        if not self._running:
+    #            self.register_input_sock(sock=None)
+    #            self.register_output_sock(sock=None)
 
 
     def _signal_interrupt_handler(self, signum, frame):

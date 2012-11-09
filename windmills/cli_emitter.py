@@ -30,7 +30,7 @@ class CliEmitter(Brick):
 
     def __init__(self, **kwargs):
         # setup the initial default configuration
-        self.delay = 1
+        self.delay = 0
         self.file = None
         self.message = 'Testing 1, 2, 3'
         self.repeat = False
@@ -82,6 +82,8 @@ class CliEmitter(Brick):
         """
 
         try:
+            self.setRun() # The run state must be set to true to detect kill signal
+
             if self.file is None:
                 send_method = self._send_msg
             else:
@@ -100,7 +102,10 @@ class CliEmitter(Brick):
             print 'Unknown Exception: ', e
             raise e
         finally:
+            self.kill()
             self.register_output_sock(None) # close the socket use
+            if self.verbose:
+                print 'CliEmitter shutting down.'
 
 
     def _send_file(self):
