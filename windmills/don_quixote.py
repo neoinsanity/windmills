@@ -42,7 +42,7 @@ class DonQuixote(object):
         'cli_emitter': CliEmitter,
         'cli_listener': CliListener,
         'echo_service': EchoService,
-        'ventilator_windmill': VentilatorWindmill
+        'ventilator_windmill': VentilatorWindmill,
     }
 
 
@@ -152,11 +152,11 @@ class DonQuixote(object):
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-f', '--file', help='The configuration file.')
+    arg_parser.add_argument('-f', '--file',
+                            required = True,
+                            help='The configuration file.')
     arg_parser.add_argument('--verbose', action='store_true')
     args = arg_parser.parse_args()
-
-    assert args.file
 
     don = DonQuixote(file=args.file,
                      verbose=args.verbose)

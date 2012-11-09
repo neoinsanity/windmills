@@ -104,6 +104,8 @@ class EmailWindmill(Brick):
             mail_client.sendmail(sender, receivers, email_msg.as_string())
             mail_client.quit()
 
+            return request_json
+
         except AttributeError, e:
             self.log.error('AttributeError: %s, while processing: %s' % (e, request_json))
         except SMTPAuthenticationError, e:

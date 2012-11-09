@@ -78,7 +78,8 @@ class Cornerstone(Scaffold):
         self.no_block_send = False
 
         # configure the interrupt handling
-        self._stop = False
+        self._stop = True
+        self._running = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         # a regular hearbeat interval must be set to the default.
@@ -242,6 +243,8 @@ class Cornerstone(Scaffold):
 
     def send(self, msg):
         assert msg
+        if self.monitor_stream:
+            print 'o: %s' % msg
         if not self.no_block_send:
             self._output_sock.send(msg)
         else:
@@ -250,6 +253,10 @@ class Cornerstone(Scaffold):
             except:
                 if self.verbose:
                     print "Unexpected error:", sys.exc_info()[0]
+
+
+    def setRun(self):
+        self._stop = False
 
 
     def isStopped(self):
@@ -265,9 +272,10 @@ class Cornerstone(Scaffold):
         mechanism for transmitting the data out to a registered handler.
         """
         self._stop = False
+        self._running = True
 
         if self.verbose:
-            print 'Beginning run() with state:', str(self)
+            print 'Beginning run() with state:', str(self), 'and configuration: ', self._args
 
         loop_count = 0
         input_count = 0
@@ -284,7 +292,7 @@ class Cornerstone(Scaffold):
                     # see additional comment AAA above.
                     msg = self.input_recv_handler(self._input_sock)
                     input_count += 1
-                    if self.monitor_stream and (input_count % 10) == 0:
+                    if self.monitor_stream: # and (input_count % 10) == 0:
                         print '.', input_count, '-', msg
 
                 if (self._control_sock and
@@ -310,6 +318,10 @@ class Cornerstone(Scaffold):
         # close the sockets held by the poller
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
+        self._running = False
+
+        if self.verbose:
+            print 'Shut down', self.__class__.__name__, '...'
 
 
     def kill(self):
@@ -318,6 +330,13 @@ class Cornerstone(Scaffold):
         invoked.
         """
         self._stop = True
+
+        # ensure all sockets are closed, in the event of socket configuration but no execution of run loop.
+
+
+    #        if not self._running:
+    #            self.register_input_sock(sock=None)
+    #            self.register_output_sock(sock=None)
 
 
     def _signal_interrupt_handler(self, signum, frame):
