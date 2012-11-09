@@ -243,6 +243,8 @@ class Cornerstone(Scaffold):
 
     def send(self, msg):
         assert msg
+        if self.monitor_stream:
+            print 'o: %s' % msg
         if not self.no_block_send:
             self._output_sock.send(msg)
         else:

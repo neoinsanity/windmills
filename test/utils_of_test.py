@@ -1,6 +1,6 @@
 import os
 from threading import Thread
-from windmills import CliEmitter, CliListener, EchoService
+from windmills import CliEmitter, CliListener, EchoService, EmailWindmill
 
 
 __author__ = 'neoinsanity'
@@ -9,6 +9,7 @@ class_map = {
     'CliEmitter': CliEmitter,
     'CliListener': CliListener,
     'EchoService': EchoService,
+    'EmailWindmill': EmailWindmill
 }
 
 
