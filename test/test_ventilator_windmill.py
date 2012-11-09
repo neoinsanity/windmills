@@ -31,7 +31,6 @@ class TestVentilatorWindmill(WindmillTestCase):
         assert t.is_alive()
         time.sleep(1)
         don.kill()
-        #time.sleep(30000) #todo: raul - remove this long sleep when testing is done
         t.join(3)
         assert not t.is_alive()
 
