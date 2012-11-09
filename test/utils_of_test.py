@@ -30,3 +30,10 @@ def gen_archive_output_pair(test_name=None ):
 
     return archive_file, output_file
 
+
+def gen_archive_output_blueprint_triad(test_name=None ):
+    archive_file, output_file = gen_archive_output_pair(test_name=test_name)
+
+    blueprint = 'test_data/blueprints/' + test_name + '.blueprint'
+
+    return archive_file, output_file, blueprint
