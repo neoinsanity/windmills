@@ -79,7 +79,6 @@ class Cornerstone(Scaffold):
 
         # configure the interrupt handling
         self._stop = True
-        self._running = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         # a regular hearbeat interval must be set to the default.
@@ -151,15 +150,6 @@ class Cornerstone(Scaffold):
         args - an object with attributes set to the argument values.e
         """
         assert args
-
-        #todo: raul - move this section to command configuraiton layer
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # of course this is when a command configuration layer get's added
-        controller = self.zmq_ctx.socket(SUB)
-        controller.connect('tcp://localhost:7885')
-        controller.setsockopt(SUBSCRIBE, "")
-        self._control_sock = controller
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
     def register_input_sock(self, sock):
@@ -272,10 +262,19 @@ class Cornerstone(Scaffold):
         mechanism for transmitting the data out to a registered handler.
         """
         self._stop = False
-        self._running = True
 
         if self.verbose:
             print 'Beginning run() with state:', str(self), 'and configuration: ', self._args
+
+        #todo: raul - move this section to command configuraiton layer
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # of course this is when a command configuration layer get's added
+        controller = self.zmq_ctx.socket(SUB)
+        controller.connect('tcp://localhost:7885')
+        controller.setsockopt(SUBSCRIBE, "")
+        self._control_sock = controller
+        self._poll.register(self._control_sock)
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         loop_count = 0
         input_count = 0
@@ -316,9 +315,9 @@ class Cornerstone(Scaffold):
                     exit(-1)
 
         # close the sockets held by the poller
+        self._control_sock.close()
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
-        self._running = False
 
         if self.verbose:
             print 'Shut down', self.__class__.__name__, '...'
@@ -330,13 +329,6 @@ class Cornerstone(Scaffold):
         invoked.
         """
         self._stop = True
-
-        # ensure all sockets are closed, in the event of socket configuration but no execution of run loop.
-
-
-    #        if not self._running:
-    #            self.register_input_sock(sock=None)
-    #            self.register_output_sock(sock=None)
 
 
     def _signal_interrupt_handler(self, signum, frame):
