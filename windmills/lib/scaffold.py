@@ -2,6 +2,8 @@
 options for the construction of *-windmill and app devices.
 """
 import argparse
+import logging
+from logging import DEBUG, ERROR, INFO, WARN
 from miller import Miller
 
 
@@ -10,20 +12,18 @@ __all__ = ['Scaffold']
 
 
 class Scaffold(Miller):
-    """
-    The Scaffold class is a helper mix-in that evaluates sys.argv into options
+    """The Scaffold class is a helper mix-in that evaluates sys.argv into options
     settings for execution of windmill devices.
 
     Scaffold operates by testing for the 'argv' property presence in the
     kwargs dictionary passed in the __init__ method. If the 'argv' property
-    is available then, Scaffold with then call configure_options and configure
-    methods that may be defined on any progenitor and ancestor base classes.
+    is available then, Scaffold will then call configure_options and configure
+    methods that may be defined on any progenitor base classes.
 
-    Any classes sharing a base class chain with Scaffold will need to
-    implement:
+    Any classes sharing a base class chain with Scaffold may implement:
         - configure_options(self, arg_parser)
             arg_parser - is an argparse.ArgumentParser object that is used by
-            each implementing base class to declare configuretion options.
+            each implementing base class to declare configuration options.
         = configure(self, args)
             args - is a property object that will be set with the keyword
             value results from parsing the configuration options.
@@ -33,8 +33,27 @@ class Scaffold(Miller):
     exiting, the child class will display the command line help message.
     """
 
+    LOG_LEVEL_MAP = {
+        'debug': DEBUG,
+        'info': INFO,
+        'warn': WARN,
+        'error': ERROR
+    }
+
 
     def __init__(self, **kwargs):
+        """
+        >>> foo = Scaffold()
+        >>> assert foo
+        >>> assert foo.log_file == 'Scaffold.log'
+        >>> assert foo.log_level == 'error'
+        >>> assert foo.verbose == False
+        """
+        # setup initial defaults
+        self.log_file = self.__class__.__name__ + '.log'
+        self.log_level = 'error'
+        self.verbose = False
+
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs and kwargs.get('argv') is not None:
             self._execute_configuration(kwargs['argv'])
@@ -45,14 +64,28 @@ class Scaffold(Miller):
 
 
     def configuration_options(self, arg_parser=None):
+        arg_parser.add_argument('--log_level',
+                                default=self.log_level,
+                                choices=['debug', 'info', 'warning', 'error'],
+                                help="Set the log level for the log output.")
         arg_parser.add_argument('--verbose',
                                 action="store_true",
+                                default=self.verbose,
                                 help='Enable verbose log output. Useful for '
                                      'debugging.')
 
 
     def configuration(self, args=None):
         assert args
+        log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, ERROR)
+
+        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            filename='windmills.log',
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=log_level)
+        self.log = logging.getLogger('windmills')
+
 
     def _execute_configuration(self, argv=None):
         """

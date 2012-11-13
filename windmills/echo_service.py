@@ -17,7 +17,7 @@ class EchoService(Cornerstone):
     >>> foo = EchoService(argv=arg_list)
     >>> t = Thread(target=foo.run)
     >>> t.start() # doctest: +ELLIPSIS
-    Beginning run() with state: <...EchoService object at ...> and configuration:  Namespace(heartbeat=3, message=None, monitor_stream=False, no_block_send=False, reply_sock_url='tcp://localhost:8889', verbose=True)
+    Beginning run() with state: <...EchoService object at ...> and configuration:  Namespace(heartbeat=3, log_level='error', message=None, monitor_stream=False, no_block_send=False, reply_sock_url='tcp://localhost:8889', verbose=True)
     >>> time.sleep(1)
     >>> assert t.is_alive()
     >>> foo.kill()
