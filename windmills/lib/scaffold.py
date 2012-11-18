@@ -42,17 +42,8 @@ class Scaffold(Miller):
 
 
     def __init__(self, **kwargs):
-        """
-        >>> foo = Scaffold()
-        >>> assert foo
-        >>> assert foo.log_file == 'Scaffold.log'
-        >>> assert foo.log_level == 'error'
-        >>> assert foo.verbose == False
-        """
-        # setup initial defaults
-        self.log_file = self.__class__.__name__ + '.log'
+        self.verbose = kwargs.get('verbose', False)
         self.log_level = 'error'
-        self.verbose = False
 
         # if there is an argv argument, then use it to set the configuration
         if 'argv' in kwargs and kwargs.get('argv') is not None:
@@ -71,12 +62,12 @@ class Scaffold(Miller):
         arg_parser.add_argument('--verbose',
                                 action="store_true",
                                 default=self.verbose,
-                                help='Enable verbose log output. Useful for '
-                                     'debugging.')
+                                help='Enable verbose log output. Useful for debugging.')
 
 
     def configuration(self, args=None):
         assert args
+
         log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, ERROR)
 
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

@@ -73,6 +73,11 @@ class Brick(Cornerstone):
                                     action='store_true',
                                     help='Configure the input to bind rather '
                                          'than connect on the input url')
+            arg_parser.add_argument('--input_connect',
+                                    dest='input_bind',
+                                    action='store_false',
+                                    help='Configure the input to connect rather '
+                                         'than bind on the input url')
 
 
         # output configuration options
@@ -89,6 +94,11 @@ class Brick(Cornerstone):
                                     action='store_true',
                                     help='Configure the output to connect rather '
                                          'than bind on the output url')
+            arg_parser.add_argument('--output_bind',
+                                    dest='output_connect',
+                                    action='store_false',
+                                    help='Configure the output to bind rather '
+                                         'then connect on the output url')
 
 
     def configure(self, args=None):

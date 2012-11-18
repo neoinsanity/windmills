@@ -98,9 +98,6 @@ class Cornerstone(Scaffold):
         # construct the poller
         self._poll = Poller()
 
-        # verbose level is off by default
-        self.verbose = False
-
         # monitoring of message stream is off by default
         self.monitor_stream = False
 
