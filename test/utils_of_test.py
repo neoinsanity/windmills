@@ -1,6 +1,7 @@
 import os
 from threading import Thread
 from windmills import CliEmitter, CliListener, EchoService, EmailWindmill
+from windmills.lib import Cornerstone
 
 
 __author__ = 'neoinsanity'
@@ -8,9 +9,10 @@ __author__ = 'neoinsanity'
 class_map = {
     'CliEmitter': CliEmitter,
     'CliListener': CliListener,
+    'Cornerstone': Cornerstone,
     'EchoService': EchoService,
-    'EmailWindmill': EmailWindmill
-}
+    'EmailWindmill': EmailWindmill,
+    }
 
 
 def thread_wrap_windmill(windmill_name=None, argv=None):

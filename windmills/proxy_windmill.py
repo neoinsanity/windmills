@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from lib import Scaffold
 import sys
-from zmq import Context, PUB, RCVMORE, SNDMORE, SUB, SUBSCRIBE
+from zmq import  PUB, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
@@ -65,8 +65,7 @@ class ProxyWindmill(Scaffold):
         sub_socket.bind(self.output_sock_url)
         self.register_output_sock(sub_socket)
 
-        if self.verbose:
-            print 'ProxyWindmill configured...'
+        self.log.info('ProxyWindmill configured...')
 
 
 if __name__ == "__main__":

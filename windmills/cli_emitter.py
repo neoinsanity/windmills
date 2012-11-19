@@ -72,8 +72,7 @@ class CliEmitter(Brick):
     def configure(self, args=None):
         assert args
 
-        if self.verbose:
-            print 'CliEmitter configured...'
+        self.log.info('CliEmitter configured...')
 
 
     def run(self):
@@ -99,13 +98,12 @@ class CliEmitter(Brick):
             # give it time to die.
             time.sleep(1)
         except Exception, e:
-            print 'Unknown Exception: ', e
+            self.log.error('Unknown Exception: %s', e)
             raise e
         finally:
             self.kill()
             self.register_output_sock(None) # close the socket use
-            if self.verbose:
-                print 'CliEmitter shutting down.'
+            self.log.info('CliEmitter shutting down.')
 
 
     def _send_file(self):

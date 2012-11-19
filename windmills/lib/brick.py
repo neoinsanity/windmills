@@ -2,6 +2,7 @@
 output sockets for 0mq device and service patterns.
 """
 from cornerstone import Cornerstone
+from logging import DEBUG
 from zmq import PUB, PULL, PUSH, SUB, SUBSCRIBE
 
 
@@ -73,6 +74,11 @@ class Brick(Cornerstone):
                                     action='store_true',
                                     help='Configure the input to bind rather '
                                          'than connect on the input url')
+            arg_parser.add_argument('--input_connect',
+                                    dest='input_bind',
+                                    action='store_false',
+                                    help='Configure the input to connect rather '
+                                         'than bind on the input url')
 
 
         # output configuration options
@@ -89,6 +95,11 @@ class Brick(Cornerstone):
                                     action='store_true',
                                     help='Configure the output to connect rather '
                                          'than bind on the output url')
+            arg_parser.add_argument('--output_bind',
+                                    dest='output_connect',
+                                    action='store_false',
+                                    help='Configure the output to bind rather '
+                                         'then connect on the output url')
 
 
     def configure(self, args=None):
@@ -111,6 +122,8 @@ class Brick(Cornerstone):
                 input_socket.connect(self.input_sock_url)
             self.register_input_sock(input_socket)
 
+            self.log.debug('Configured input socket.')
+
         # configure output socket to include the socket option settings
         if self.CONFIGURE_OUTPUT:
             sock_type = PUSH
@@ -123,3 +136,5 @@ class Brick(Cornerstone):
             else:
                 output_socket.bind(self.output_sock_url)
             self.register_output_sock(output_socket)
+
+            self.log.debug('Configured output socket.')
