@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from lib import Brick
 import sys
-from zmq import PULL, SUB, SUBSCRIBE
 
 
 __author__ = 'neoinsanity'
@@ -54,8 +53,7 @@ class CliListener(Brick):
         if self.file is not None:
             self._file = open(self.file, 'w')
 
-        if self.verbose:
-            print 'CliListener configured...'
+        self.log.info('CliListener configured...')
 
 
     def _listener_recv_handler(self, sock):

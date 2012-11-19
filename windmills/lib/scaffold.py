@@ -126,7 +126,7 @@ class Scaffold(Miller):
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # assign the windmill instance logger
-        logging.basicConfig()
+        #logging.basicConfig()
         self.log = logging.getLogger(self.name)
         self.log.setLevel(self.log_level)
 
@@ -150,8 +150,7 @@ class Scaffold(Miller):
             console_handler.setFormatter(formatter)
             self.log.addHandler(console_handler)
 
-        if self.log_level == INFO:
-            self.log.info('Logging configured for: %s', self.name)
+        self.log.info('Logging configured for: %s', self.name)
 
 
     def _execute_configuration(self, argv=None):
@@ -199,5 +198,4 @@ class Scaffold(Miller):
         self.__invoke_method_on_bases__(func_name='configure',
                                         args=self._args)
 
-        if self.log_level == INFO:
-            self.log.info('... scaffold configuration complete ...')
+        self.log.info('... scaffold configuration complete ...')

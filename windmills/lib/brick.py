@@ -122,8 +122,7 @@ class Brick(Cornerstone):
                 input_socket.connect(self.input_sock_url)
             self.register_input_sock(input_socket)
 
-            if self.log_level == DEBUG:
-                self.log.debug('Configured input socket.')
+            self.log.debug('Configured input socket.')
 
         # configure output socket to include the socket option settings
         if self.CONFIGURE_OUTPUT:
@@ -138,5 +137,4 @@ class Brick(Cornerstone):
                 output_socket.bind(self.output_sock_url)
             self.register_output_sock(output_socket)
 
-            if self.log_level == DEBUG:
-                self.log.debug('Configured output socket.')
+            self.log.debug('Configured output socket.')

@@ -10,7 +10,6 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from logging import INFO
 from scaffold import Scaffold
 import signal
 import sys
@@ -261,8 +260,7 @@ class Cornerstone(Scaffold):
         """
         self._stop = False
 
-        if self.log_level == INFO:
-            self.log.info('Beginning run() with configuration: %s', self._args)
+        self.log.info('Beginning run() with configuration: %s', self._args)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -299,14 +297,12 @@ class Cornerstone(Scaffold):
                         self._command_handler(msg)
 
                 if self._stop:
-                    if self.log_level == INFO:
-                        self.log('Stop flag triggered ... shutting down.')
+                    self.log.info('Stop flag triggered ... shutting down.')
                     break
 
             except ZMQError, ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
-                    if self.log_level == INFO:
-                        self.log.info('System interrupt call detected.')
+                    self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions
                     self.log.error('Unhandled exception in run execution:%d - %s'
                                    % (ze.errno, ze.strerror))
@@ -317,8 +313,7 @@ class Cornerstone(Scaffold):
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
 
-        if self.log_level == INFO:
-            self.log.info('Run terminated for %s', self.name)
+        self.log.info('Run terminated for %s', self.name)
 
 
     def kill(self):
