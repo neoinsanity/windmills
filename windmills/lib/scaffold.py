@@ -50,10 +50,11 @@ class Scaffold(Miller):
 
         A default Scaffold will assume the name of the instantiating class. In addition, it will
         not consider the name to have been set.
+        >>> import logging
         >>> foo = Scaffold()
         >>> assert foo.name == 'Scaffold'
         >>> assert foo.name_set == False
-        >>> assert foo.log_level == 'error'
+        >>> assert foo.log_level == logging.ERROR
         >>> assert foo.log_path == None
         >>> assert foo.verbose == False
 
@@ -61,16 +62,16 @@ class Scaffold(Miller):
         >>> bar = Scaffold(['--name','Bar','--log_level','debug','--verbose'])
         >>> assert bar.name == 'Bar'
         >>> assert bar.name_set == True
-        >>> assert bar.log_level == 'debug'
+        >>> assert bar.log_level == logging.DEBUG
         >>> assert bar.log_path == None
         >>> assert bar.verbose == True
 
         In addition, the Scaffold can be configured from a string.
-        >>> dude = Scaffold('--name Dude --log_level info --log_path test_out')
+        >>> dude = Scaffold('--name Dude --log_level info --log_path test/test_out')
         >>> assert dude.name == 'Dude'
         >>> assert dude.name_set == True
-        >>> assert dude.log_level == 'info'
-        >>> assert dude.log_path == 'test_out'
+        >>> assert dude.log_level == logging.INFO
+        >>> assert dude.log_path == 'test/test_out'
         >>> assert dude.verbose == False
         """
         self.log_level = 'error'
@@ -117,34 +118,48 @@ class Scaffold(Miller):
 
 
     def _configure_logging(self):
-        log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, ERROR)
+        """This method configures the self.log entity for log handling.
 
-        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        # construct log parameter args
-        log_config = {
-            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            'log_level': self.log_level
-        }
-
-        if self.log_path:
-            if self.log_path.endswith('.log'):
-                filename = self.log_path
-            else:
-                filename = os.path.join(self.log_path, self.name + '.log')
-            log_config['filename'] = filename
-
-        logging.basicConfig(**log_config)
+        :return: None
+        """
+        self.log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, ERROR)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # assign the windmill instance logger
+        logging.basicConfig()
         self.log = logging.getLogger(self.name)
+        self.log.setLevel(self.log_level)
+
+        if self.log_path:
+            file_path = None
+            if self.log_path.endswith('.log'):
+                file_path = self.log_path
+            else:
+                file_path = os.path.join(self.log_path, self.name + '.log')
+            assert file_path
+            file_handler = logging.FileHandler(file_path)
+            file_handler.setLevel(self.log_level)
+            file_handler.setFormatter(formatter)
+            self.log.addHandler(file_handler)
+
+        # if we are in verbose mode, then we send log output to console
+        if self.verbose:
+            # add the console logger for verbose mode
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(self.log_level)
+            console_handler.setFormatter(formatter)
+            self.log.addHandler(console_handler)
+
+        if self.log_level == INFO:
+            self.log.info('Logging configured for: %s', self.name)
 
 
     def _execute_configuration(self, argv=None):
         """Collect and configure the configuration options for instantiation of Scaffold and child classes.
 
         This method operates by taking an argument list in ArgParse format and creating an argument
-        list. The argument list is created by invoking the configuration_option method defined by each of the progenitor classes derived from Scaffold.
+        list. The argument list is created by invoking the configuration_option method defined by
+        each of the progenitor classes derived from Scaffold.
 
         :param argv: A list of arguments of the form ['--verbose', '--name', 'my-name', ...]
 
@@ -183,3 +198,6 @@ class Scaffold(Miller):
         # in the class inheritance chain
         self.__invoke_method_on_bases__(func_name='configure',
                                         args=self._args)
+
+        if self.log_level == INFO:
+            self.log.info('... scaffold configuration complete ...')
