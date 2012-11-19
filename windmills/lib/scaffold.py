@@ -67,11 +67,11 @@ class Scaffold(Miller):
         >>> assert bar.verbose == True
 
         In addition, the Scaffold can be configured from a string.
-        >>> dude = Scaffold('--name Dude --log_level info --log_path test/test_out')
+        >>> dude = Scaffold('--name Dude --log_level info --log_path ../test/test_out')
         >>> assert dude.name == 'Dude'
         >>> assert dude.name_set == True
         >>> assert dude.log_level == logging.INFO
-        >>> assert dude.log_path == 'test/test_out'
+        >>> assert dude.log_path == '../test/test_out'
         >>> assert dude.verbose == False
         """
         self.log_level = 'error'
