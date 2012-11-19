@@ -3,6 +3,7 @@ options for the construction of *-windmill and app devices.
 """
 import argparse
 import logging
+import os.path
 from logging import DEBUG, ERROR, INFO, WARN
 from miller import Miller
 
@@ -24,7 +25,7 @@ class Scaffold(Miller):
         - configure_options(self, arg_parser)
             arg_parser - is an argparse.ArgumentParser object that is used by
             each implementing base class to declare configuration options.
-        = configure(self, args)
+        - configure(self, args)
             args - is a property object that will be set with the keyword
             value results from parsing the configuration options.
 
@@ -41,26 +42,50 @@ class Scaffold(Miller):
     }
 
 
-    def __init__(self, argv=[], **kwargs):
+    def __init__(self, argv=[]):
         """ Initializes the Scaffold support infrastructure.
 
+        :param argv : An array of arguments of the form ['--verbose', '--name', 'my_name', ...]
+        :return: A configured instance of Scaffold.
 
-        :param argv : An array of arguments of the form ['--verbose', '--name', 'my_name'
-        :param kwargs: The kwargs that are passed down for initialization. The
-        :return:
+        A default Scaffold will assume the name of the instantiating class. In addition, it will
+        not consider the name to have been set.
+        >>> foo = Scaffold()
+        >>> assert foo.name == 'Scaffold'
+        >>> assert foo.name_set == False
+        >>> assert foo.log_level == 'error'
+        >>> assert foo.log_path == None
+        >>> assert foo.verbose == False
+
+        A Scaffold can be configured utilizing the an array style argument list.
+        >>> bar = Scaffold(['--name','Bar','--log_level','debug','--verbose'])
+        >>> assert bar.name == 'Bar'
+        >>> assert bar.name_set == True
+        >>> assert bar.log_level == 'debug'
+        >>> assert bar.log_path == None
+        >>> assert bar.verbose == True
+
+        In addition, the Scaffold can be configured from a string.
+        >>> dude = Scaffold('--name Dude --log_level info --log_path test_out')
+        >>> assert dude.name == 'Dude'
+        >>> assert dude.name_set == True
+        >>> assert dude.log_level == 'info'
+        >>> assert dude.log_path == 'test_out'
+        >>> assert dude.verbose == False
         """
         self.log_level = 'error'
+        self.log_path = None
         self.name = self.__class__.__name__
         self.name_set = False
         self.verbose = False
 
-        # if there is an argv argument, then use it to set the configuration
-        #if 'argv' in kwargs and kwargs.get('argv') is not None:
-        if argv is not None:
-            #argv = kwargs['argv']
-            if '--name' in argv:
-            # determine if a name has benn set for the instantiating windmill instance
-                self.name_set = True
+        # helper to allow using string for configuration
+        if argv is not None and isinstance(argv, basestring):
+            argv = argv.split() # convert string to args style list
+
+        # determine if a name has benn set for the instantiating windmill instance
+        if argv and '--name' in argv:
+            self.name_set = True
 
         self._execute_configuration(argv)
 
@@ -70,6 +95,11 @@ class Scaffold(Miller):
                                 default=self.log_level,
                                 choices=['debug', 'info', 'warning', 'error'],
                                 help="Set the log level for the log output.")
+        arg_parser.add_argument('--log_path',
+                                default=self.log_path,
+                                help='Set the path for log output. The default file created is '
+                                     'the path/name.log. If the path ends with a ".log", then '
+                                     'the path will assume a file path.')
         arg_parser.add_argument('--name',
                                 default=self.name,
                                 help='This will set the name for the current instance. The name '
@@ -80,32 +110,51 @@ class Scaffold(Miller):
                                 help='Enable verbose log output. Useful for debugging.')
 
 
-    def configuration(self, args=None):
+    def configure(self, args=None):
         assert args
 
+        self._configure_logging()
+
+
+    def _configure_logging(self):
         log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, ERROR)
 
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logging.basicConfig(
-            filename=self.name + '.log',
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            level=log_level)
-        self.log = logging.getLogger('windmills')
+
+        # construct log parameter args
+        log_config = {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            'log_level': self.log_level
+        }
+
+        if self.log_path:
+            if self.log_path.endswith('.log'):
+                filename = self.log_path
+            else:
+                filename = os.path.join(self.log_path, self.name + '.log')
+            log_config['filename'] = filename
+
+        logging.basicConfig(**log_config)
+
+        # assign the windmill instance logger
+        self.log = logging.getLogger(self.name)
 
 
     def _execute_configuration(self, argv=None):
-        """
-        Collect the options for parsing from each service which is
-        interested. This is done by invoking the configuration_options on
-        each  of the base classes.
+        """Collect and configure the configuration options for instantiation of Scaffold and child classes.
 
+        This method operates by taking an argument list in ArgParse format and creating an argument
+        list. The argument list is created by invoking the configuration_option method defined by each of the progenitor classes derived from Scaffold.
+
+        :param argv: A list of arguments of the form ['--verbose', '--name', 'my-name', ...]
+
+        This test shows how the
         >>> foo = Scaffold()
         >>> argv = [
         ... '/Users/neoinsanity/samples/samples/my-argparse/simpe_argparse.py',
         ... '--verbose']
         >>> foo._execute_configuration(argv=argv)
         >>> assert foo.verbose == True
-
         """
         if argv is None:
             argv = [] # just create an empty arg list
