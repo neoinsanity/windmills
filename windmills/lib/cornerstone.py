@@ -317,7 +317,7 @@ class Cornerstone(Scaffold):
         self.register_output_sock(sock=None)
 
         if self.verbose:
-            print 'Shut down', self.__class__.__name__, '...'
+            print 'Shut down', self.name, '...'
 
 
     def kill(self):

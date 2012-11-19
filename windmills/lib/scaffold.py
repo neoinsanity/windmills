@@ -41,17 +41,28 @@ class Scaffold(Miller):
     }
 
 
-    def __init__(self, **kwargs):
-        self.verbose = kwargs.get('verbose', False)
+    def __init__(self, argv=[], **kwargs):
+        """ Initializes the Scaffold support infrastructure.
+
+
+        :param argv : An array of arguments of the form ['--verbose', '--name', 'my_name'
+        :param kwargs: The kwargs that are passed down for initialization. The
+        :return:
+        """
         self.log_level = 'error'
+        self.name = self.__class__.__name__
+        self.name_set = False
+        self.verbose = False
 
         # if there is an argv argument, then use it to set the configuration
-        if 'argv' in kwargs and kwargs.get('argv') is not None:
-            self._execute_configuration(kwargs['argv'])
-        else:
-            empty_args = self.__create_property_bag__()
-            self.__invoke_method_on_bases__(func_name='configure',
-                                            args=empty_args)
+        #if 'argv' in kwargs and kwargs.get('argv') is not None:
+        if argv is not None:
+            #argv = kwargs['argv']
+            if '--name' in argv:
+            # determine if a name has benn set for the instantiating windmill instance
+                self.name_set = True
+
+        self._execute_configuration(argv)
 
 
     def configuration_options(self, arg_parser=None):
@@ -59,6 +70,10 @@ class Scaffold(Miller):
                                 default=self.log_level,
                                 choices=['debug', 'info', 'warning', 'error'],
                                 help="Set the log level for the log output.")
+        arg_parser.add_argument('--name',
+                                default=self.name,
+                                help='This will set the name for the current instance. The name '
+                                     'is used for both log output and zmq socket identification')
         arg_parser.add_argument('--verbose',
                                 action="store_true",
                                 default=self.verbose,
@@ -72,7 +87,7 @@ class Scaffold(Miller):
 
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.basicConfig(
-            filename='windmills.log',
+            filename=self.name + '.log',
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             level=log_level)
         self.log = logging.getLogger('windmills')
