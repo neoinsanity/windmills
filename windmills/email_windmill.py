@@ -6,7 +6,6 @@ from schematics.types.compound import ListType
 from smtplib import SMTP, SMTPAuthenticationError, SMTPServerDisconnected
 from windmills.lib import Brick
 import json
-import logging
 import os
 import schematics.base
 import socket
@@ -34,19 +33,6 @@ class EmailWindmill(Brick):
 
 
     def __init__(self, **kwargs):
-        # !!!!! todo: raul - replace with real configurable logging !!!!!
-        verbose = kwargs.get('verbose', False)
-        log_level = logging.ERROR
-        if verbose:
-            log_level = logging.DEBUG
-        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        logging.basicConfig(
-            filename='/tmp/email_windmill.log',
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            level=log_level)
-        self.log = logging.getLogger('EmailWindmill')
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
         # setup the initial default configuration
         self.user_name = self.SENDGRID_USERNAME
         self.password = self.SENDGRID_PASSWORD
@@ -67,8 +53,7 @@ class EmailWindmill(Brick):
     def configure(self, args=None):
         assert args
 
-        if self.verbose:
-            self.log.info('EmailWindmill configured...')
+        self.log.info('EmailWindmill configured...')
 
 
     def _email_recv_handler(self, sock):
@@ -76,8 +61,7 @@ class EmailWindmill(Brick):
         try:
             request_json = self._input_sock.recv()
 
-            if self.verbose:
-                print 'Request:', request_json
+            self.log.debug('Request: %s', request_json)
 
             email_request = json.loads(request_json)
             payload = email_request['payload']
@@ -86,8 +70,8 @@ class EmailWindmill(Brick):
             try:
                 validator.validate(validate_all=True)
             except schematics.base.ModelException, e:
-                self.log.error('schematics.base.ModelException: %s, while processing %s'
-                               % (e, payload))
+                self.log.error('schematics.base.ModelException: %s, while processing %s',
+                               e, payload)
                 return
 
             sender = payload['sender']

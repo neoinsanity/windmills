@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from lib import Brick
 import sys
-import zmq
 
 
 __author__ = 'neoinsanity'
@@ -33,7 +32,6 @@ class VentilatorWindmill(Brick):
         # set up the initial default configuration
         self.input_sock_url = 'tcp://localhost:6687'
         self.input_sock_type = "PULL"
-        #self.input_bind = True
 
         self.output_sock_url = 'tcp://*:6688'
         self.output_sock_type = "PUSH"
@@ -47,6 +45,8 @@ class VentilatorWindmill(Brick):
 
     def configure(self, args=None):
         assert args
+
+        self.log.info('Ventilator Windmill configured ...')
 
 
 if __name__ == '__main__':

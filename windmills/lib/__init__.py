@@ -1,4 +1,5 @@
 __author__ = 'neoinsanity'
+
 __all__ = ['Brick', 'Cornerstone', 'Miller', 'Mortar', 'Scaffold']
 
 from brick import Brick

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
 from lib import Scaffold
+import sys
 from zmq import DEALER, POLLIN, RCVMORE, ROUTER, SNDMORE, ZMQError
 
 
@@ -49,12 +49,13 @@ class RouterDealerWindmill(Scaffold):
         dealer_sock.bind(self.dealer_sock_url)
         self._dealer_sock = dealer_sock
 
+        self.log.info('Configured Router Dealer Windmill ...')
+
 
     def run(self):
         self._stop = False
 
-        if self.verbose:
-            print 'Beginning run with state:', str(self)
+        self.log.info('Beginning run with state: %s', str(self))
 
         loop_count = 0
         front_end_loop = 0
@@ -64,8 +65,7 @@ class RouterDealerWindmill(Scaffold):
                 socks = dict(self._poll.poll(timeout=self.heartbeat))
                 loop_count += 1
                 if self.monitor_stream and (loop_count % 1000) == 0:
-                    sys.stdout.write('loop(%s)' % loop_count)
-                    sys.stdout.flush()
+                    self.log.info('loop(%s)', loop_count)
 
                 if socks.get(self._router_sock) == POLLIN:
                     msg = self._router_sock.recv()
@@ -77,7 +77,7 @@ class RouterDealerWindmill(Scaffold):
                     if self.monitor_stream:
                         front_end_loop += 1
                         if(front_end_loop % 10) == 0:
-                            print '.', front_end_loop, '-', msg, '-'
+                            self.log.info('d:%s-%s', front_end_loop, msg)
 
                 if socks.get(self._dealer_sock) == POLLIN:
                     msg = self._dealer_sock.recv()
@@ -88,16 +88,14 @@ class RouterDealerWindmill(Scaffold):
                         self._router_sock.send(msg)
                     if self.monitor_stream:
                         back_end_loop += 1
-                        if(back_end_loop % 10) == 0:
-                            print '.', back_end_loop, '-', msg, '-'
+                        self.log.info('r:%s-%s', back_end_loop, msg)
 
             except ZMQError, ze:
                 if ze.errno == 4: # known exception due to keyboard ctrl+c
-                    if self.verbose:
-                        print 'System interrupt detected.'
+                    self.log.info('System interrupt detected.')
                 else: # exit hard on unhandled exception
-                    print ('Unhandled exception in run exectuion:%d - %s'
-                           % (ze.errno, ze.strerror))
+                    self.log.error('Unhandled exception in run exectuion:%d - %s',
+                                   ze.errno, ze.strerror)
 
 
 if __name__ == '__main__':

@@ -129,12 +129,16 @@ class Miller(object):
         if func_name is None:
             raise ValueError(
                 '__invoke_method_on_bases__-func_name parameter required')
+        base_list = []
         base = self.__class__ # The root in the chain
         while base is not None and base is not object:
+            base_list.append(base)
+            base = base.__base__ # iterate to the next base class
+
+        for base in reversed(base_list):
             if func_name in base.__dict__:
                 func = getattr(base, func_name)
                 func(self, *args, **kwargs)
-            base = base.__base__ # iterate to the next base class
 
 
     def __set_unassigned_attrs__(self, target, attr_list):

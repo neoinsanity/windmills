@@ -79,7 +79,6 @@ class Cornerstone(Scaffold):
 
         # configure the interrupt handling
         self._stop = True
-        self._running = False
         signal.signal(signal.SIGINT, self._signal_interrupt_handler)
 
         # a regular hearbeat interval must be set to the default.
@@ -98,9 +97,6 @@ class Cornerstone(Scaffold):
 
         # construct the poller
         self._poll = Poller()
-
-        # verbose level is off by default
-        self.verbose = False
 
         # monitoring of message stream is off by default
         self.monitor_stream = False
@@ -151,15 +147,6 @@ class Cornerstone(Scaffold):
         args - an object with attributes set to the argument values.e
         """
         assert args
-
-        #todo: raul - move this section to command configuraiton layer
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # of course this is when a command configuration layer get's added
-        controller = self.zmq_ctx.socket(SUB)
-        controller.connect('tcp://localhost:7885')
-        controller.setsockopt(SUBSCRIBE, "")
-        self._control_sock = controller
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
     def register_input_sock(self, sock):
@@ -244,15 +231,15 @@ class Cornerstone(Scaffold):
     def send(self, msg):
         assert msg
         if self.monitor_stream:
-            print 'o: %s' % msg
+            self.log.info('o: %s', msg)
+
         if not self.no_block_send:
             self._output_sock.send(msg)
         else:
             try:
                 self._output_sock.send(msg, NOBLOCK)
             except:
-                if self.verbose:
-                    print "Unexpected error:", sys.exc_info()[0]
+                self.log.error("Unexpected error:", sys.exc_info()[0])
 
 
     def setRun(self):
@@ -272,10 +259,18 @@ class Cornerstone(Scaffold):
         mechanism for transmitting the data out to a registered handler.
         """
         self._stop = False
-        self._running = True
 
-        if self.verbose:
-            print 'Beginning run() with state:', str(self), 'and configuration: ', self._args
+        self.log.info('Beginning run() with configuration: %s', self._args)
+
+        #todo: raul - move this section to command configuraiton layer
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # of course this is when a command configuration layer get's added
+        controller = self.zmq_ctx.socket(SUB)
+        controller.connect('tcp://localhost:7885')
+        controller.setsockopt(SUBSCRIBE, "")
+        self._control_sock = controller
+        self._poll.register(self._control_sock)
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         loop_count = 0
         input_count = 0
@@ -293,7 +288,7 @@ class Cornerstone(Scaffold):
                     msg = self.input_recv_handler(self._input_sock)
                     input_count += 1
                     if self.monitor_stream: # and (input_count % 10) == 0:
-                        print '.', input_count, '-', msg
+                        self.log.info('i:%s- %s', input_count, msg)
 
                 if (self._control_sock and
                     socks.get(self._control_sock) == POLLIN):
@@ -302,26 +297,23 @@ class Cornerstone(Scaffold):
                         self._command_handler(msg)
 
                 if self._stop:
-                    if self.verbose:
-                        print 'Stop flag triggered ... shutting down.'
+                    self.log.info('Stop flag triggered ... shutting down.')
                     break
 
             except ZMQError, ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
-                    if self.verbose:
-                        print 'System interrupt call detected.'
+                    self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions
-                    print ('Unhandled exception in run execution:%d - %s'
-                           % (ze.errno, ze.strerror))
+                    self.log.error('Unhandled exception in run execution:%d - %s'
+                                   % (ze.errno, ze.strerror))
                     exit(-1)
 
         # close the sockets held by the poller
+        self._control_sock.close()
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
-        self._running = False
 
-        if self.verbose:
-            print 'Shut down', self.__class__.__name__, '...'
+        self.log.info('Run terminated for %s', self.name)
 
 
     def kill(self):
@@ -330,13 +322,6 @@ class Cornerstone(Scaffold):
         invoked.
         """
         self._stop = True
-
-        # ensure all sockets are closed, in the event of socket configuration but no execution of run loop.
-
-
-    #        if not self._running:
-    #            self.register_input_sock(sock=None)
-    #            self.register_output_sock(sock=None)
 
 
     def _signal_interrupt_handler(self, signum, frame):
