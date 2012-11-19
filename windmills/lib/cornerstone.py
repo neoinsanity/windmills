@@ -10,6 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
+from logging import INFO
 from scaffold import Scaffold
 import signal
 import sys
@@ -231,15 +232,15 @@ class Cornerstone(Scaffold):
     def send(self, msg):
         assert msg
         if self.monitor_stream:
-            print 'o: %s' % msg
+            self.log.info('o: %s', msg)
+
         if not self.no_block_send:
             self._output_sock.send(msg)
         else:
             try:
                 self._output_sock.send(msg, NOBLOCK)
             except:
-                if self.verbose:
-                    print "Unexpected error:", sys.exc_info()[0]
+                self.log.error("Unexpected error:", sys.exc_info()[0])
 
 
     def setRun(self):
@@ -260,8 +261,8 @@ class Cornerstone(Scaffold):
         """
         self._stop = False
 
-        if self.verbose:
-            print 'Beginning run() with state:', str(self), 'and configuration: ', self._args
+        if self.log_level == INFO:
+            self.log.info('Beginning run() with configuration: %s', self._args)
 
         #todo: raul - move this section to command configuraiton layer
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -289,7 +290,7 @@ class Cornerstone(Scaffold):
                     msg = self.input_recv_handler(self._input_sock)
                     input_count += 1
                     if self.monitor_stream: # and (input_count % 10) == 0:
-                        print '.', input_count, '-', msg
+                        self.log.info('i:%s- %s', input_count, msg)
 
                 if (self._control_sock and
                     socks.get(self._control_sock) == POLLIN):
@@ -298,17 +299,17 @@ class Cornerstone(Scaffold):
                         self._command_handler(msg)
 
                 if self._stop:
-                    if self.verbose:
-                        print 'Stop flag triggered ... shutting down.'
+                    if self.log_level == INFO:
+                        self.log('Stop flag triggered ... shutting down.')
                     break
 
             except ZMQError, ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
-                    if self.verbose:
-                        print 'System interrupt call detected.'
+                    if self.log_level == INFO:
+                        self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions
-                    print ('Unhandled exception in run execution:%d - %s'
-                           % (ze.errno, ze.strerror))
+                    self.log.error('Unhandled exception in run execution:%d - %s'
+                                   % (ze.errno, ze.strerror))
                     exit(-1)
 
         # close the sockets held by the poller
@@ -316,8 +317,8 @@ class Cornerstone(Scaffold):
         self.register_input_sock(sock=None)
         self.register_output_sock(sock=None)
 
-        if self.verbose:
-            print 'Shut down', self.name, '...'
+        if self.log_level == INFO:
+            self.log.info('Run terminated for %s', self.name)
 
 
     def kill(self):
