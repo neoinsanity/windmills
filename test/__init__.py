@@ -1,3 +1,3 @@
-__all__ = ['WindmillTestCase']
+__author__ = 'Raul Gonzalez'
 
-from windmill_test_case import WindmillTestCase
+# Ensure that the test environment is properly set up.

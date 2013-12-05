@@ -1,0 +1,1 @@
+Search.setIndex({objects:{},terms:{index:0,search:0,welcom:0,modul:0,windmil:0,indic:0,tabl:0,page:0},objtypes:{},titles:["Welcome to Windmills"],objnames:{},filenames:["index"]})

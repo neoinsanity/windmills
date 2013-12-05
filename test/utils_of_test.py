@@ -1,42 +1,61 @@
+from gevent import spawn
 import os
-from threading import Thread
-from windmills import CliEmitter, CliListener, EchoService, EmailWindmill
-from windmills.lib import Cornerstone
+from windmills.utility_service.cli_emitter import CliEmitter
+from windmills.utility_service.cli_listener import CliListener
 
-
-__author__ = 'neoinsanity'
+__author__ = 'Raul Gonzalez'
 
 class_map = {
-    'CliEmitter': CliEmitter,
-    'CliListener': CliListener,
-    'Cornerstone': Cornerstone,
-    'EchoService': EchoService,
-    'EmailWindmill': EmailWindmill,
-    }
+  'CliEmitter': CliEmitter,
+  'CliListener': CliListener,
+}
 
 
 def thread_wrap_windmill(windmill_name=None, argv=None):
-    assert windmill_name
-    windmill = class_map[windmill_name](argv=argv)
-    t = Thread(target=windmill.run)
-    t.windmill = windmill
+  assert windmill_name
+  windmill = class_map[windmill_name](argv=argv)
+  t = spawn(target=windmill.run)
+  t.windmill = windmill  # a pointer to the created windmill
 
-    return t
-
-
-def gen_archive_output_pair(test_name=None ):
-    archive_file = 'test_data/archive/' + test_name + '._archive'
-    output_file = 'test_out/' + test_name + '._output'
-
-    if os.path.exists(output_file):
-        os.remove(output_file)
-
-    return archive_file, output_file
+  return t
 
 
-def gen_archive_output_blueprint_triad(test_name=None ):
-    archive_file, output_file = gen_archive_output_pair(test_name=test_name)
+def gen_archive(test_name=None):
+  return 'test_data/archive/' + test_name + '._archive'
 
-    blueprint = 'test_data/blueprints/' + test_name + '.blueprint'
 
-    return archive_file, output_file, blueprint
+def gen_blueprint(test_name=None):
+  return 'test_data/blueprints/' + test_name + '.blueprint'
+
+
+def gen_input(test_name=None):
+  return 'test_data/inputs/' + test_name + '._input'
+
+
+def gen_output(test_name=None):
+  output_file = 'test_out/' + test_name + '._output'
+
+  if os.path.exists(output_file):
+    os.remove(output_file)
+
+  return output_file
+
+
+def gen_archive_output_pair(test_name=None):
+  return gen_archive(test_name), gen_output(test_name)
+
+
+def gen_archive_input_output_triad(test_name=None):
+  return gen_archive(test_name), gen_input(test_name), gen_output(test_name)
+
+
+def gen_archive_output_blueprint_triad(test_name=None):
+  return gen_archive(test_name), gen_output(test_name), gen_blueprint(test_name)
+
+
+def gen_input_output_pair(test_name=None):
+  return gen_input(test_name), gen_output(test_name)
+
+
+def gen_input_output_blueprint_triad(test_name=None):
+  return gen_input(test_name), gen_output(test_name), gen_blueprint(test_name)
