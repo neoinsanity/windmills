@@ -4,4 +4,4 @@ windmills.egg-info
 .coverage
 COVERAGE_REPORT/
 TEST_OUT/
-
+.idea/
