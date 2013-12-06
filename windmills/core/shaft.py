@@ -145,23 +145,6 @@ class Shaft(Scaffold):
 
     return cargo
 
-  def _configure_socket(self, socket_config):
-    assert socket_config
-
-    try:
-      sock_type = ZMQ_OUTPUT_SOCKET_TYPE.get(socket_config.sock_type, None)
-      if sock_type is None:
-        raise ValueError(
-          'Unknown output socket type: %s', socket_config.sock_type)
-
-    except zmq.ZMQError as ze:
-      self.log.exception(ze)
-      raise WindmillException(ze.message)
-    except Exception as e:
-      self.log.exception(e)
-      raise WindmillException(str(e))
-
-
   def send_crate(self, cargo, crate):
     assert crate
 
