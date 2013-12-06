@@ -249,12 +249,12 @@ class Scaffold(Miller):
 
     A Scaffold can be configured utilizing the an array style argument list.
 
-    >>> bar = Scaffold(['--app_name','Bar','--log_level','debug','--verbose'])
+    >>> bar = Scaffold(['--app_name','Bar','--log_level','debug'])
     >>> assert bar.app_name == 'Bar'
     >>> assert bar.app_name_set == True
     >>> assert bar.log_level == logging.DEBUG
     >>> assert bar.log_path == None
-    >>> assert bar.verbose == True
+    >>> assert bar.verbose == False
 
     In addition, the Scaffold can be configured from a string.
 

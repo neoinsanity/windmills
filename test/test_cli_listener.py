@@ -1,9 +1,11 @@
-from gevent import spawn, joinall
+from gevent import joinall, sleep
 import zmq.green as zmq
-from windmills.utility_service import CliListener
-from windmills.core.crate import Crate
 
+from utils_of_test import StdOutCapture, spawn_windmill
 from windmill_test_case import WindmillTestCase
+
+from windmills.core.crate import Crate
+from windmills.utility_service import CliListener
 
 __author__ = 'Raul Gonzalez'
 
@@ -30,15 +32,31 @@ class TestCliListener(WindmillTestCase):
 
     self.zmq_ctx.destroy()
 
-  def test_cli_default_behavior(self):
-    argv = '--verbose'
-    cli_listener = CliListener(argv=argv)
+  def test_default_behavior(self):
+    """Tests the default behavior of the CliListener.
 
-    g = spawn(cli_listener.run)
+    This test is validated by setting --verbose on the CliListener instance,
+    and then capturing the log output to stdout.
+    """
+    with StdOutCapture() as output:
+      argv = '--verbose'
+      the_spawn, cli_listener = spawn_windmill(CliListener, argv)
 
-    crate = Crate(call_ctx={}, msg_ctx={}, msg_data='hello')
+      self.assertFalse(cli_listener.is_stopped())
 
-    self.sock_map['PAIR'].send(crate.dump)
+      # test message
+      crate = Crate(msg_data='hello')
+      self.sock_map['PAIR'].send(crate.dump)
 
-    res = joinall([g, ], timeout=2)
-    print '+++++ This is the result:', res
+      # wait on the message delivery
+      joinall([the_spawn, ], timeout=0.1)
+
+      # test shutdown
+      cli_listener.kill()
+      sleep(0)  # yield to allow shutdown
+
+      self.assertTrue(cli_listener.is_stopped())
+
+    self.assertEqual(
+      output,
+      ['{"call_ctx": {}, "msg_ctx": {}, "msg_data": "hello"}', 'hello'])

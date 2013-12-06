@@ -4,7 +4,7 @@ __author__ = 'Raul Gonzalez'
 
 
 class Crate(object):
-  def __init__(self, call_ctx=None, msg_ctx=None, msg_data=None):
+  def __init__(self, call_ctx=dict(), msg_ctx=dict(), msg_data=None):
     self._call_ctx = call_ctx
     self._msg_ctx = msg_ctx
     self._msg_data = msg_data

@@ -47,17 +47,14 @@ class TestShaft(WindmillTestCase):
     cmd_sock.bind('tcp://*:54749')
 
     # create the test subject
-    argv = '--verbose --log_level debug'
-    the_spawn, shaft = spawn_windmill(Shaft, argv=argv)
+    the_spawn, shaft = spawn_windmill(Shaft)
 
     # test for the expected state of shaft in run mode
     self.assertIsNotNone(shaft)
     self.assertFalse(shaft.is_stopped())
 
     # send the kill command
-    shaft.log.debug('Sending the kill command')
     cmd_sock.send('kill')
-    #sleep(3)
 
     # verify and validate shaft shutdown
     joinall([the_spawn], timeout=1)

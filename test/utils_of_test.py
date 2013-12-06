@@ -1,16 +1,11 @@
-from gevent import sleep, spawn
+from cStringIO import StringIO
 import os
+import sys
 
-from windmills.core import Shaft
-from windmills.utility_service import CliEmitter, CliListener
+from gevent import sleep, spawn
+
 
 __author__ = 'Raul Gonzalez'
-
-class_map = {
-  'CliEmitter': CliEmitter,
-  'CliListener': CliListener,
-  'Shaft': Shaft,
-}
 
 
 def spawn_windmill(windmill_class=None, argv=None):
@@ -61,3 +56,14 @@ def gen_input_output_pair(test_name=None):
 
 def gen_input_output_blueprint_triad(test_name=None):
   return gen_input(test_name), gen_output(test_name), gen_blueprint(test_name)
+
+
+class StdOutCapture(list):
+  def __enter__(self):
+    self._original_stdout = sys.stdout
+    sys.stdout = self._stringio = StringIO()
+    return self
+
+  def __exit__(self, exc_type, exc_val, exc_tb):
+    self.extend(self._stringio.getvalue().splitlines())
+    sys.stdout = self._original_stdout
