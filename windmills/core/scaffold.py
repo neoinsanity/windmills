@@ -177,7 +177,7 @@ class Scaffold(Miller):
 
   *Scaffold* supports the following command line options::
 
-    usage: <some_class>.py [-h] [--log_level {debug,info,warning,error}]
+    usage: <some_class>.py [-h] [--log_level {debug,info,warn,error}]
                         [--log_path LOG_PATH] [--app_name APP_NAME] [--verbose]
 
     optional arguments:
@@ -259,12 +259,11 @@ class Scaffold(Miller):
     In addition, the Scaffold can be configured from a string.
 
     >>> dude = Scaffold(
-    ...   '--app_name Dude --log_level info --log_path TEST_OUT')
+    ...   '--app_name Dude --log_level info')
     >>> assert dude
     >>> assert dude.app_name == 'Dude'
     >>> assert dude.app_name_set == True
     >>> assert dude.log_level == logging.INFO
-    >>> assert dude.log_path == 'TEST_OUT'
     >>> assert dude.verbose == False
     """
     #: Current log level, set to logging.DEBUG, INFO, WARNING, OR ERROR at
@@ -306,7 +305,7 @@ class Scaffold(Miller):
                                  'output.')
     arg_parser.add_argument('--log_level',
                             default=self.log_level,
-                            choices=['debug', 'info', 'warning', 'error'],
+                            choices=['debug', 'info', 'warn', 'error'],
                             help='Set the log level for the log output.')
     arg_parser.add_argument('--log_path',
                             default=self.log_path,
