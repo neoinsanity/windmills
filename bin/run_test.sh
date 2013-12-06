@@ -13,6 +13,10 @@
 # Remove pyc files that may cause false results.
 find . -type f -iname \*.pyc -delete
 
+# Remove the current coverage collection file
+rm -f .coverage
+rm -rf COVERAGE_REPORT
+
 # Ensure that a test output directory is created to
 # make a common location for test cruft.
 mkdir -p TEST_OUT
