@@ -1,23 +1,25 @@
-from gevent import spawn
+from gevent import sleep, spawn
 import os
-from windmills.utility_service.cli_emitter import CliEmitter
-from windmills.utility_service.cli_listener import CliListener
+
+from windmills.core import Shaft
+from windmills.utility_service import CliEmitter, CliListener
 
 __author__ = 'Raul Gonzalez'
 
 class_map = {
   'CliEmitter': CliEmitter,
   'CliListener': CliListener,
+  'Shaft': Shaft,
 }
 
 
-def thread_wrap_windmill(windmill_name=None, argv=None):
-  assert windmill_name
-  windmill = class_map[windmill_name](argv=argv)
-  t = spawn(target=windmill.run)
-  t.windmill = windmill  # a pointer to the created windmill
+def spawn_windmill(windmill_class=None, argv=None):
+  assert windmill_class
+  windmill = windmill_class(argv=argv)
+  the_spawn = spawn(windmill.run)
+  sleep(0) # yield so the_spawn can execute
 
-  return t
+  return the_spawn, windmill
 
 
 def gen_archive(test_name=None):

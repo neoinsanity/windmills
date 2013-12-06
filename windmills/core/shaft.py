@@ -187,9 +187,6 @@ class Shaft(Scaffold):
       except Exception:
         self.log.exception('Unexpected error: %s', sys.exc_info()[0])
 
-  def setRun(self):
-    self._stop = False
-
   def is_stopped(self):
     return self._stop
 
@@ -208,12 +205,14 @@ class Shaft(Scaffold):
     #todo: raul - move this section to command configuration layer
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # of course this is when a command configuration layer get's added
-    controller = self._zmq_ctx.socket(zmq.SUB)
-    controller.connect('tcp://localhost:7885')
-    controller.setsockopt(zmq.SUBSCRIBE, "")
+    controller = self._zmq_ctx.socket(zmq.PAIR)
+    controller.connect('tcp://localhost:54749')
+    # controller.setsockopt(zmq.SUBSCRIBE, '')
     self._control_sock = controller
-    self._poll.register(self._control_sock)
+    self._poll.register(self._control_sock, zmq.POLLIN)
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    self.log.debug('Entering run loop')
 
     while True:
       try:
@@ -226,6 +225,7 @@ class Shaft(Scaffold):
         if (self._control_sock and socks.get(
               self._control_sock) == zmq.POLLIN):
           msg = self._control_sock.recv()
+          self.log.debug('Command msg: %s', msg)
           if self._command_handler is not None:
             self._command_handler(msg)
 
@@ -275,4 +275,5 @@ class Shaft(Scaffold):
     This method is the default command channel message handler. It simply
     invokes a kill flag for any message received.
     """
+    self.log.debug('Got the kill command.')
     self.kill()
