@@ -14,7 +14,6 @@ class Blade(Miller):
   def recv_handler(self, sock):
     assert sock
     msg_json = sock.recv()
-    print msg_json  #todo: raul - remove when done with development
     msg = json.loads(msg_json)
     crate = Crate(msg['call_ctx'], msg['msg_ctx'], msg['msg_data'])
     self.handler(crate)
