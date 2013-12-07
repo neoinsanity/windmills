@@ -40,11 +40,11 @@ class CliListener(Shaft):
     assert cargo
     self.log.debug('cargo: %s', cargo)
     if self.file is None:
-      sys.stdout.write(cargo.msg_data)
+      sys.stdout.write(cargo.dump)
       sys.stdout.write('\n')
       sys.stdout.flush()
     else:
-      self._file.write(cargo.msg_data)
+      self._file.write(cargo.dump)
       self._file.write('\n')
       self._file.flush()
 
