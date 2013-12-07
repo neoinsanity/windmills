@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import sys
 from windmills.core.shaft import Shaft
 
@@ -15,7 +16,6 @@ class CliListener(Shaft):
     # register to utilize a receive only input handler
     self.declare_blade(handler=self.listener_recv_handler)
 
-
   def configuration_options(self, arg_parser=None):
     assert arg_parser
 
@@ -26,29 +26,34 @@ class CliListener(Shaft):
     assert args
 
     if self.file is not None:
-      self._file = open(self.file, 'w')
+      self.log.info('Opening file for output: %s', self.file)
+      self._file = open(self.file, 'a')
 
     self.log.info('CliListener configured ...')
 
-  def listener_recv_handler(self, cargo=None):
+  def listener_recv_handler(self, crate=None):
     """
     This method is a replacement for Cornerstone._default_recv_handler.
     It will take an incoming input message and display it to console,
     or it will send the incoming message content to a designated file is
     one is provided.
     """
-    assert cargo
-    self.log.debug('cargo: %s', cargo)
+    assert crate
     if self.file is None:
-      sys.stdout.write(cargo.dump)
+      sys.stdout.write(crate.dump)
       sys.stdout.write('\n')
       sys.stdout.flush()
     else:
-      self._file.write(cargo.dump)
+      self._file.write(crate.dump)
       self._file.write('\n')
       self._file.flush()
 
-    return cargo.msg_data
+    the_dump = crate.dump
+    the__dump = crate._dump
+    str_crate = str(crate)
+
+    self.log.debug('heard: %s', crate)
+    return crate.msg_data
 
 
 if __name__ == '__main__':

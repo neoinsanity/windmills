@@ -9,6 +9,8 @@ class Crate(object):
     self._msg_ctx = msg_ctx
     self._msg_data = msg_data
 
+    self._dump = None
+
   @property
   def call_ctx(self):
     return self._call_ctx
@@ -23,9 +25,15 @@ class Crate(object):
 
   @property
   def dump(self):
-    return json.dumps(
-      {
-        'call_ctx': self.call_ctx,
-        'msg_ctx': self.msg_ctx,
-        'msg_data': self.msg_data
-      })
+    if not self._dump:
+      self._dump = json.dumps(
+        {
+          'call_ctx': self.call_ctx,
+          'msg_ctx': self.msg_ctx,
+          'msg_data': self.msg_data
+        })
+
+    return self._dump
+
+  def __str__(self):
+    return self.dump

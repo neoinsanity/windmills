@@ -1,42 +1,38 @@
+
 import argparse
 import signal
 import sys
 
-from gevent import monkey
 import zmq.green as zmq
 
 from cargo import Cargo
 from blade import Blade
 from scaffold import Scaffold
-from windmill_core_exception import WindmillException
 
 
 __author__ = 'Raul Gonzalez'
 
-# Need to insure that gevent monkey patching for supported libraries.
-monkey.patch_all()
-
 
 #: Mapping for zmq_socket_types
 ZMQ_INPUT_SOCKET_TYPE = {
-  'pair': zmq.PAIR,
   'pull': zmq.PULL,
   'rep': zmq.REP,
   'sub': zmq.SUB,
+  'router': zmq.ROUTER,
 }
 
 ZMQ_OUTPUT_SOCKET_TYPE = {
-  'pair': zmq.PAIR,
   'pub': zmq.PUB,
   'push': zmq.PUSH,
   'req': zmq.REQ,
+  'dealer': zmq.REQ,
 }
 
 
 class SocketConfig(object):
   def __init__(self,
                url='tcp://localhost:60053',
-               sock_type='pair',
+               sock_type='pull',
                sock_filter='',
                sock_bind=False,
                linger=0,

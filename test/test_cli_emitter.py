@@ -11,10 +11,3 @@ class TestCliEmitter():
 
   def tearDown(self):
     pass
-
-  def test_cli_emitter_default_behavior(self):
-    archive_file, output_file = gen_archive_output_pair(
-      'cli_emitter_default_behavior')
-
-    emitter = CliEmitter()
-    assert emitter
