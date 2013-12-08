@@ -14,7 +14,7 @@ class CliEmitter(Shaft):
 
     Shaft.__init__(self, **kwargs)
 
-    self.cargo = self.cargo()
+    self.cargo = self.declare_cargo()
 
   def configuration_options(self, arg_parser=None):
     assert arg_parser

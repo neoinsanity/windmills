@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from windmills.core.socket_config import DEFAULT_INPUT_SOCKET
+
 from windmills.core.shaft import Shaft
 
 __author__ = 'Raul Gonzalez'
@@ -15,8 +15,8 @@ class CliListener(Shaft):
     Shaft.__init__(self, **kwargs)
 
     # register to utilize a receive only input handler
-    self.blade(handler=self.listener_recv_handler,
-               socket_options=DEFAULT_INPUT_SOCKET)
+    self.declare_blade(handler=self.listener_recv_handler)
+
   def configuration_options(self, arg_parser=None):
     assert arg_parser
 

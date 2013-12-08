@@ -5,9 +5,10 @@ import sys
 from gevent import sleep
 import zmq.green as zmq
 
+from super_core import SocketConfig
+from super_core import DEFAULT_INPUT_SOCKET, DEFAULT_OUTPUT_SOCKET
 from cargo import Cargo
 from blade import Blade
-from socket_config import ZMQ_OUTPUT_SOCKET_TYPE, ZMQ_INPUT_SOCKET_TYPE, SocketConfig
 from scaffold import Scaffold
 
 
@@ -26,7 +27,7 @@ class Shaft(Scaffold):
     signal.signal(signal.SIGILL, self._signal_interrupt_handler)
 
     #: a heartbeat interval that will be relaid to control channel
-    self.heartbeat = 3
+    self.heartbeat = 1
 
     # create the zmq context for
     self._zmq_ctx = zmq.Context()
@@ -53,7 +54,7 @@ class Shaft(Scaffold):
 
     self.log.debug('... shaft configuration complete ...')
 
-  def blade(self, handler=None, socket_options=None):
+  def declare_blade(self, handler=None, socket_options=DEFAULT_INPUT_SOCKET):
     if handler == None:
       raise ValueError('Must pass handler method to be called to accept '
                        'received Cargo object.')
@@ -63,8 +64,7 @@ class Shaft(Scaffold):
 
     # create and store the socket
     socket_config = SocketConfig(socket_options)
-    socket_type = ZMQ_INPUT_SOCKET_TYPE[socket_config.sock_type]
-    blade_sock = self._zmq_ctx.socket(socket_type)
+    blade_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
     blade_sock.linger = socket_config.linger
 
     if socket_config.sock_bind:
@@ -80,14 +80,14 @@ class Shaft(Scaffold):
     self._blades[blade] = (blade_sock, socket_config)
     return blade
 
-  def cargo(self, callback=None, socket_config=None):
+  def declare_cargo(self, callback=None, socket_options=DEFAULT_OUTPUT_SOCKET):
 
-    self.log.info('... Configuring cargo socket: %s', socket_config)
+    self.log.info('... Configuring cargo socket: %s', socket_options)
     cargo = Cargo(shaft=self, handler=callback)
 
     # create and store the socket
-    socket_type = ZMQ_OUTPUT_SOCKET_TYPE[socket_config.sock_type.lower()]
-    cargo_sock = self._zmq_ctx.socket(socket_type)
+    socket_config = SocketConfig(socket_options)
+    cargo_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
     cargo_sock.linger = socket_config.linger
 
     if socket_config.sock_bind:

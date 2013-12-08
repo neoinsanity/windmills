@@ -21,6 +21,10 @@ ZMQ_OUTPUT_SOCKET_TYPE = {
   'dealer': zmq.REQ,
 }
 
+ZMQ_SOCKET_TYPES = dict()
+ZMQ_SOCKET_TYPES.update(ZMQ_INPUT_SOCKET_TYPE.items())
+ZMQ_SOCKET_TYPES.update(ZMQ_OUTPUT_SOCKET_TYPE.items())
+
 DEFAULT_INPUT_SOCKET = {
   'url': 'tcp://localhost:60053',
   'sock_type': 'pull',
@@ -44,8 +48,12 @@ DEFAULT_OUTPUT_SOCKET = {
 class SocketConfig(Model):
   url = StringType(required=True)
   sock_type = StringType(choices=['push', 'pull'], required=True)
-  sock_filter = StringType(default='', required=False)
+  sock_filter = StringType(default=ZMQ_SOCKET_TYPES.keys(), required=False)
   sock_bind = BooleanType(default=False, required=False)
   linger = IntType(default=0, required=False)
   monitor_stream = BooleanType(default=False, required=False)
   no_block_send = BooleanType(default=False, required=False)
+
+  @property
+  def zmq_sock_type(self):
+    return ZMQ_INPUT_SOCKET_TYPE[self.sock_type]
