@@ -5,8 +5,8 @@ import sys
 from gevent import sleep
 import zmq.green as zmq
 
-from super_core import SocketConfig
-from super_core import DEFAULT_INPUT_SOCKET, DEFAULT_OUTPUT_SOCKET
+from super_core import InputSocketConfig, OutputSocketConfig
+from super_core import DEFAULT_INPUT_OPTIONS, DEFAULT_OUTPUT_OPTIONS
 from cargo import Cargo
 from blade import Blade
 from scaffold import Scaffold
@@ -54,7 +54,7 @@ class Shaft(Scaffold):
 
     self.log.debug('... shaft configuration complete ...')
 
-  def declare_blade(self, handler=None, socket_options=DEFAULT_INPUT_SOCKET):
+  def declare_blade(self, handler=None, socket_options=DEFAULT_INPUT_OPTIONS):
     if handler == None:
       raise ValueError('Must pass handler method to be called to accept '
                        'received Cargo object.')
@@ -63,7 +63,8 @@ class Shaft(Scaffold):
     blade = Blade(shaft=self, handler=handler)
 
     # create and store the socket
-    socket_config = SocketConfig(socket_options)
+    socket_config = InputSocketConfig(socket_options)
+    InputSocketConfig.validate(socket_config)
     blade_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
     blade_sock.linger = socket_config.linger
 
@@ -80,13 +81,14 @@ class Shaft(Scaffold):
     self._blades[blade] = (blade_sock, socket_config)
     return blade
 
-  def declare_cargo(self, callback=None, socket_options=DEFAULT_OUTPUT_SOCKET):
+  def declare_cargo(self, callback=None, socket_options=DEFAULT_OUTPUT_OPTIONS):
 
     self.log.info('... Configuring cargo socket: %s', socket_options)
     cargo = Cargo(shaft=self, handler=callback)
 
     # create and store the socket
-    socket_config = SocketConfig(socket_options)
+    socket_config = OutputSocketConfig(socket_options)
+    OutputSocketConfig.validate(socket_config)
     cargo_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
     cargo_sock.linger = socket_config.linger
 
