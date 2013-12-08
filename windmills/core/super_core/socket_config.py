@@ -56,7 +56,7 @@ class SocketConfig(Model):
 
   @property
   def zmq_sock_type(self):
-    return ZMQ_INPUT_SOCKET_TYPE[self.sock_type]
+    return ZMQ_SOCKET_TYPES[self.sock_type]
 
 
 class InputSocketConfig(SocketConfig):

@@ -58,7 +58,7 @@ class CliEmitter(Shaft):
 
     """
     try:
-      self.setRun()  # The run state must be set to true to detect kill signal
+      self._stop = False  #TODO: raul - need to remove this for call back
 
       if self.file is None:
         send_method = self._send_msg
