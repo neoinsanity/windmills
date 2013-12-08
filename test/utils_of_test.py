@@ -13,6 +13,7 @@ def spawn_windmill(windmill_class=None, argv=None):
   windmill = windmill_class(argv=argv)
   the_spawn = spawn(windmill.run)
   sleep(0) # yield so the_spawn can execute
+  windmill.log.debug('Spawned windmill: %s', windmill)
 
   return the_spawn, windmill
 

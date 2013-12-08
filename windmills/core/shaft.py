@@ -1,8 +1,8 @@
-
 import argparse
 import signal
 import sys
 
+from gevent import sleep
 import zmq.green as zmq
 
 from cargo import Cargo
@@ -112,7 +112,12 @@ class Shaft(Scaffold):
     blade_sock.linger = socket_config.linger
 
     if socket_config.sock_bind:
-      blade_sock.bind(socket_config.url)
+      if socket_config.url.endswith('*'):
+        blade.port = blade_sock.bind_to_random_port(socket_config.url,
+                                                    min_port=200000,
+                                                    max_port=200500)
+      else:
+        blade_sock.bind(socket_config.url)
     else:
       blade_sock.connect(socket_config.url)
 
@@ -133,7 +138,12 @@ class Shaft(Scaffold):
     cargo_sock.linger = socket_config.linger
 
     if socket_config.sock_bind:
-      cargo_sock.bind(socket_config.url)
+      if socket_config.url.endswith('*'):
+        cargo.port = cargo_sock.bind_to_random_port(socket_config.url,
+                                                    min_port=200501,
+                                                    max_port=300000)
+      else:
+        cargo_sock.bind(socket_config.url)
     else:
       cargo_sock.connect(socket_config.url)
 
@@ -184,14 +194,15 @@ class Shaft(Scaffold):
     #todo: raul - move this section to command configuration layer
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # of course this is when a command configuration layer get's added
-    controller = self._zmq_ctx.socket(zmq.PAIR)
+    controller = self._zmq_ctx.socket(zmq.SUB)
     controller.connect('tcp://localhost:54749')
-    # controller.setsockopt(zmq.SUBSCRIBE, '')
+    controller.setsockopt(zmq.SUBSCRIBE, '')
     self._control_sock = controller
     self._poll.register(self._control_sock, zmq.POLLIN)
+    self.log.info('Configured cmd socket')
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    self.log.debug('Entering run loop')
+    self.log.info('Entering run loop')
 
     while True:
       try:
@@ -202,15 +213,19 @@ class Shaft(Scaffold):
             msg = socks_handler_map[input_sock].recv_handler(input_sock)
 
         if (self._control_sock and socks.get(
-              self._control_sock) == zmq.POLLIN):
+            self._control_sock) == zmq.POLLIN):
           msg = self._control_sock.recv()
-          self.log.debug('Command msg: %s', msg)
+          self.log.info('Command msg: %s', msg)
           if self._command_handler is not None:
             self._command_handler(msg)
+            if self._stop:
+              break
 
         if self._stop:
           self.log.info('Stop flag triggered ... shutting down.')
           break
+
+        sleep(0)  # yield to give other spawns a chance to execute
 
       except zmq.ZMQError, ze:
         if ze.errno == 4: # Known exception due to keyboard ctrl+c

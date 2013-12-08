@@ -1,5 +1,5 @@
 from gevent import joinall, sleep, spawn
-import zmq.green as zmq
+import zmq
 
 from utils_of_test import spawn_windmill
 from windmill_test_case import WindmillTestCase
@@ -16,7 +16,12 @@ class TestShaft(WindmillTestCase):
   def tearDown(self):
     self.zmq_ctx.destroy()
 
-  def test_shaft_default_behavior(self):
+  def test_shaft_base_behavior(self):
+    """A test that simply starts and stops a Shaft instance.
+
+    This test is just to ensure that however complex other test scenarios may
+    get, the most basic operation of starting and stopping Shaft is working.
+    """
 
     shaft = Shaft()
 
@@ -40,10 +45,11 @@ class TestShaft(WindmillTestCase):
     # test that the shaft is in the correct stop state
     self.assertTrue(shaft.is_stopped())
 
-  def test_shaft_remote_kill(self):
+  def test_basic_remote_kill(self):
+    """Test the ability to remote kill a shaft via zmq socket."""
 
     # setup a zmq socket to signal a remote kill to the shaft
-    cmd_sock = self.zmq_ctx.socket(zmq.PAIR)
+    cmd_sock = self.zmq_ctx.socket(zmq.PUB)
     cmd_sock.bind('tcp://*:54749')
 
     # create the test subject
@@ -53,11 +59,16 @@ class TestShaft(WindmillTestCase):
     self.assertIsNotNone(shaft)
     self.assertFalse(shaft.is_stopped())
 
-    # send the kill command
-    cmd_sock.send('kill')
+    # send the kill command to the shaft instance.
+    # because this is a PUB socket, multiple calls maybe required to allow
+    # time for connect negotiation between PUB and SUB
+    for _ in range(3):
+      cmd_sock.send('kill')
+      joinall([the_spawn, ], timeout=0.1)
+      if the_spawn.successful():  # if spawn is done running
+        break;                    # exit the message send loop
 
-    # verify and validate shaft shutdown
-    joinall([the_spawn], timeout=1)
+    self.assertTrue(the_spawn.successful())
     self.assertIsNone(the_spawn.exception)
 
     # test that the shaft is in the correct stop state
