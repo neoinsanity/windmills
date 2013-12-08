@@ -38,7 +38,6 @@ class TestCliListener(WindmillTestCase):
     """
     with StdOutCapture() as output:
       the_spawn, cli_listener = spawn_windmill(CliListener)
-
       self.assertFalse(cli_listener.is_stopped())
 
       # test message
@@ -54,7 +53,6 @@ class TestCliListener(WindmillTestCase):
 
       self.assertTrue(cli_listener.is_stopped())
 
-    # END OF WITH
     self.assertEqual(
       output,
       ['{"call_ctx": {}, "msg_ctx": {}, "msg_data": "hola"}'],

@@ -6,6 +6,7 @@ from windmill_test_case import WindmillTestCase
 
 from windmills.core import Shaft
 
+
 __author__ = 'Raul Gonzalez'
 
 

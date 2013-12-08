@@ -7,55 +7,11 @@ import zmq.green as zmq
 
 from cargo import Cargo
 from blade import Blade
+from socket_config import ZMQ_OUTPUT_SOCKET_TYPE, ZMQ_INPUT_SOCKET_TYPE, SocketConfig
 from scaffold import Scaffold
 
 
 __author__ = 'Raul Gonzalez'
-
-
-#: Mapping for zmq_socket_types
-ZMQ_INPUT_SOCKET_TYPE = {
-  'pull': zmq.PULL,
-  'rep': zmq.REP,
-  'sub': zmq.SUB,
-  'router': zmq.ROUTER,
-}
-
-ZMQ_OUTPUT_SOCKET_TYPE = {
-  'pub': zmq.PUB,
-  'push': zmq.PUSH,
-  'req': zmq.REQ,
-  'dealer': zmq.REQ,
-}
-
-
-class SocketConfig(object):
-  def __init__(self,
-               url='tcp://localhost:60053',
-               sock_type='pull',
-               sock_filter='',
-               sock_bind=False,
-               linger=0,
-               monitor_stream=False,
-               no_block_send=False):
-    self.url = url
-    self.sock_type = sock_type
-    self.sock_filter = sock_filter
-    self.sock_bind = sock_bind
-    self.linger = linger
-    self.monitor_stream = monitor_stream
-    self.no_block_send = no_block_send
-
-  def __str__(self):
-    return str({
-      'url': self.url,
-      'sock_type': self.sock_type,
-      'sock_filter': self.sock_filter,
-      'sock_bind': self.sock_bind,
-      'linger': self.linger,
-      'monitor_stream': self.monitor_stream,
-      'no_block_send': self.no_block_send,
-    })
 
 
 class Shaft(Scaffold):
@@ -97,17 +53,17 @@ class Shaft(Scaffold):
 
     self.log.debug('... shaft configuration complete ...')
 
-  def declare_blade(self, handler=None, socket_config=SocketConfig()):
-
+  def blade(self, handler=None, socket_options=None):
     if handler == None:
       raise ValueError('Must pass handler method to be called to accept '
                        'received Cargo object.')
 
-    self.log.info('... Configuring blade socket: %s', socket_config)
+    self.log.info('... Configuring socket options: %s', socket_options)
     blade = Blade(shaft=self, handler=handler)
 
     # create and store the socket
-    socket_type = ZMQ_INPUT_SOCKET_TYPE[socket_config.sock_type.lower()]
+    socket_config = SocketConfig(socket_options)
+    socket_type = ZMQ_INPUT_SOCKET_TYPE[socket_config.sock_type]
     blade_sock = self._zmq_ctx.socket(socket_type)
     blade_sock.linger = socket_config.linger
 
@@ -122,15 +78,12 @@ class Shaft(Scaffold):
       blade_sock.connect(socket_config.url)
 
     self._blades[blade] = (blade_sock, socket_config)
-
     return blade
 
-  def declare_cargo(self,
-                    handler=None,
-                    socket_config=SocketConfig()):
+  def cargo(self, callback=None, socket_config=None):
 
     self.log.info('... Configuring cargo socket: %s', socket_config)
-    cargo = Cargo(shaft=self, handler=handler)
+    cargo = Cargo(shaft=self, handler=callback)
 
     # create and store the socket
     socket_type = ZMQ_OUTPUT_SOCKET_TYPE[socket_config.sock_type.lower()]

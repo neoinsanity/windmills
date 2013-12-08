@@ -17,6 +17,8 @@ setup(
   author_email='mindbender@gmail.com',
   description='This is a set of tools and libraries focused on creating 0mq'
               ' based solutions.',
-  packages=['windmills'],
+  packages=['windmills',
+            'windmills.core',
+            'windmills.utility_service'],
   install_requires=requires,
 )
