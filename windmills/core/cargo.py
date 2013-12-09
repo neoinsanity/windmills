@@ -1,17 +1,14 @@
-from miller import Miller
-from crate import Crate
+from gevent import spawn
 
-__author__ = 'neoinsanity'
+__author__ = 'Raul Gonzalez'
 
 
-class Cargo(Miller):
+class Cargo(object):
   def __init__(self, handler=None, shaft=None, port=None):
-    #: The handler should only be necessary if response expected
-    self.handler = handler
     #: The handle to the
     self.shaft = shaft
     self.port = port
 
   def send(self, crate=None):
-    self.shaft.send_crate(cargo=self, crate=crate)
+    spawn(self.shaft.send_crate, cargo=self, crate=crate)
 
