@@ -5,22 +5,13 @@ __author__ = 'neoinsanity'
 
 
 class Cargo(Miller):
-  def __init__(self, handler=None, shaft=None):
+  def __init__(self, handler=None, shaft=None, port=None):
     #: The handler should only be necessary if response expected
     self.handler = handler
     #: The handle to the
     self.shaft = shaft
+    self.port = port
 
-  def send(self, msg_data=None):
-    call_ctx = {
-      'application': 'chitty,chitty,bang,bang'
-    }
-
-    msg_ctx = {
-      'msg_type': 'dummy_value'
-    }
-
-    crate = Crate(call_ctx=call_ctx, msg_ctx=msg_ctx, msg_data=msg_data)
-
+  def send(self, crate=None):
     self.shaft.send_crate(cargo=self, crate=crate)
 

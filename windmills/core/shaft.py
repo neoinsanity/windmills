@@ -3,6 +3,7 @@ import signal
 import sys
 
 from gevent import sleep
+import re
 import zmq.green as zmq
 
 from super_core import InputSocketConfig, OutputSocketConfig
@@ -84,7 +85,6 @@ class Shaft(Scaffold):
   def declare_cargo(self, callback=None, socket_options=DEFAULT_OUTPUT_OPTIONS):
 
     self.log.info('... Configuring cargo socket: %s', socket_options)
-    cargo = Cargo(shaft=self, handler=callback)
 
     # create and store the socket
     socket_config = OutputSocketConfig(socket_options)
@@ -92,9 +92,10 @@ class Shaft(Scaffold):
     cargo_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
     cargo_sock.linger = socket_config.linger
 
+    port = None
     if socket_config.sock_bind:
       if socket_config.url.endswith('*'):
-        cargo.port = cargo_sock.bind_to_random_port(socket_config.url,
+        port = cargo_sock.bind_to_random_port(socket_config.url,
                                                     min_port=200501,
                                                     max_port=300000)
       else:
@@ -102,8 +103,15 @@ class Shaft(Scaffold):
     else:
       cargo_sock.connect(socket_config.url)
 
-    self._cargos[cargo] = (cargo_sock, socket_config)
+    # ensure the socket can be used for sending
+    self._poll.register(cargo_sock, zmq.POLLOUT)
 
+    # actual creation and recording of Cargo
+    if not port:
+      port = re.match('.*?([0-9]+)$', socket_config.url).group(1)
+    print 'port:', port
+    cargo = Cargo(shaft=self, handler=callback, port=port)
+    self._cargos[cargo] = (cargo_sock, socket_config)
     return cargo
 
   def send_crate(self, cargo, crate):
@@ -114,7 +122,13 @@ class Shaft(Scaffold):
 
     #todo: raul - then send crate
     msg = crate.dump
-    self.send(msg, sock, socket_config)
+
+    for cnt in range(3):
+      self.log.debug('poll check on socket(%s): %s', cnt, sock)
+      socks = dict(self._poll.poll())
+      if socks.get(sock) == zmq.POLLOUT:
+        self.send(msg, sock, socket_config)
+        break
 
   def send(self, msg, sock, sock_config):
     assert msg
@@ -128,8 +142,8 @@ class Shaft(Scaffold):
         sock.send_multipart([msg], zmq.NOBLOCK)
       except zmq.ZMQError as ze:
         self.log.exception('ZMQ error detection: %s', ze)
-      except Exception:
-        self.log.exception('Unexpected error: %s', sys.exc_info()[0])
+      except Exception as e:
+        self.log.exception('Unexpected exception: %s', e)
 
   def is_stopped(self):
     return self._stop
@@ -161,7 +175,7 @@ class Shaft(Scaffold):
 
     while True:
       try:
-        socks = dict(self._poll.poll(timeout=self.heartbeat))
+        socks = dict(self._poll.poll(timeout=self.heartbeat * 1000))
 
         for input_sock in socks_handler_map.keys():
           if socks.get(input_sock) == zmq.POLLIN:

@@ -1,6 +1,6 @@
 import sys
 import time
-from windmills.core import Shaft
+from windmills.core import Crate, Shaft
 
 __author__ = 'Raul Gonzalez'
 
@@ -85,7 +85,7 @@ class CliEmitter(Shaft):
   def _send_file(self):
     with open(self.file, 'r') as f:
       for msg in f:
-        self._transmit(msg.rstrip('\n'))
+        self._transmit(msg.rstrip())
         if self.is_stopped():
           return
 
@@ -99,7 +99,8 @@ class CliEmitter(Shaft):
       time.sleep(self.delay)
 
     self.log.debug('transmit msg: %s', msg)
-    self.cargo.send(msg)
+    crate = Crate(msg_data=msg)
+    self.cargo.send(crate)
 
 
 if __name__ == '__main__':

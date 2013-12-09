@@ -18,14 +18,18 @@ class TestCliEmitter(WindmillTestCase):
 
 
   def test_default_behavior(self):
+    pull_sock = self.zmq_ctx.socket(zmq.PULL)
+    pull_sock.bind('tcp://*:60053')
 
-    push_sock = self.zmq_ctx.socket(zmq.PUSH)
-    push_sock.bind('tcp://*:60053')
+    sleep(0)
+
     the_spawn, cli_emitter = spawn_windmill(CliEmitter)
 
-    self.assertFalse(cli_emitter.is_stopped())
+    msg = pull_sock.recv_multipart()
 
-    cli_emitter.kill()
+    self.assertIsNotNone(msg)
+
+    self.assertFalse(cli_emitter.is_stopped())
 
     joinall([the_spawn], timeout=0.1)
 
