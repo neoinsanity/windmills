@@ -1,12 +1,11 @@
 from  gevent import spawn
 import json
 from crate import Crate
-from miller import Miller
 
-__author__ = 'neoinsanity'
+__author__ = 'Raul Gonzalez'
 
 
-class Blade(Miller):
+class Blade(object):
   def __init__(self, handler=None, shaft=None):
     # call handler
     self.handler = handler

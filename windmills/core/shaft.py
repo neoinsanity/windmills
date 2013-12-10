@@ -1,15 +1,17 @@
 import argparse
+from random import randint
+import re
 import signal
-import sys
+from sys import maxint
 
 from gevent import sleep
-import re
 import zmq.green as zmq
 
-from super_core import InputSocketConfig, OutputSocketConfig
+from super_core import DeliveryHandler, InputSocketConfig, OutputSocketConfig
 from super_core import DEFAULT_INPUT_OPTIONS, DEFAULT_OUTPUT_OPTIONS
-from cargo import Cargo
 from blade import Blade
+from brick import Brick
+from cargo import Cargo
 from scaffold import Scaffold
 
 
@@ -19,6 +21,7 @@ __author__ = 'Raul Gonzalez'
 class Shaft(Scaffold):
   def __init__(self, **kwargs):
     self._blades = dict()
+    self._bricks = list()
     self._cargos = dict()
     self._output_sock = None
     self._control_sock = None
@@ -82,7 +85,15 @@ class Shaft(Scaffold):
     self._blades[blade] = (blade_sock, socket_config)
     return blade
 
-  def declare_cargo(self, callback=None, socket_options=DEFAULT_OUTPUT_OPTIONS):
+  def declare_brick(self, target, *args, **kwargs):
+
+    self.log.info('... Configuring brick: %s, %s, %s', target, args, kwargs)
+
+    brick = Brick(func=target, *args, **kwargs)
+
+    self._bricks.append(brick)
+
+  def declare_cargo(self, socket_options=DEFAULT_OUTPUT_OPTIONS):
 
     self.log.info('... Configuring cargo socket: %s', socket_options)
 
@@ -96,8 +107,8 @@ class Shaft(Scaffold):
     if socket_config.sock_bind:
       if socket_config.url.endswith('*'):
         port = cargo_sock.bind_to_random_port(socket_config.url,
-                                                    min_port=200501,
-                                                    max_port=300000)
+                                              min_port=200501,
+                                              max_port=300000)
       else:
         cargo_sock.bind(socket_config.url)
     else:
@@ -109,16 +120,22 @@ class Shaft(Scaffold):
     # actual creation and recording of Cargo
     if not port:
       port = re.match('.*?([0-9]+)$', socket_config.url).group(1)
-    print 'port:', port
-    cargo = Cargo(shaft=self, handler=callback, port=port)
-    self._cargos[cargo] = (cargo_sock, socket_config)
+
+    # abstract handle to allow cargo instance to deliver a message
+    delivery_key = randint(-maxint - 1, maxint)
+    delivery_handler = DeliveryHandler(delivery_key=delivery_key,
+                                       send_func=self.send_crate)
+
+    cargo = Cargo(delivery_handle=delivery_handler.send_crate, port=port)
+    self._cargos[delivery_key] = (cargo_sock, socket_config)
     return cargo
 
-  def send_crate(self, cargo, crate):
+  def send_crate(self, delivery_key, crate):
+    assert delivery_key
     assert crate
 
     #todo: raul -  create socket/retrieve socket for now
-    sock, socket_config = self._cargos.get(cargo)
+    sock, socket_config = self._cargos.get(delivery_key)
 
     #todo: raul - then send crate
     msg = crate.dump
@@ -173,6 +190,10 @@ class Shaft(Scaffold):
 
     self.log.info('Entering run loop')
 
+    # start all of the bricks
+    for brick in self._bricks:
+      brick.start()
+
     while True:
       try:
         socks = dict(self._poll.poll(timeout=self.heartbeat * 1000))
@@ -203,6 +224,10 @@ class Shaft(Scaffold):
           self.log.error('Unhandled exception in run execution:%d - %s'
                          % (ze.errno, ze.strerror))
           exit(-1)
+
+    # stop the running bricks
+    for brick in self._bricks:
+      brick.stop()
 
     # close the sockets held by the poller
     self._control_sock.close()
