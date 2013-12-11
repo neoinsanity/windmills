@@ -37,9 +37,10 @@ class TestShaft(WindmillTestCase):
 
     shaft.kill()
 
-    joinall([the_spawn], timeout=1)
+    joinall([the_spawn], timeout=3)
 
     # test to make sure that the shaft has successfully stopped
+    self.assertTrue(the_spawn.ready())
     self.assertTrue(the_spawn.successful())
     self.assertIsNone(the_spawn.exception)
 
