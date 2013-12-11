@@ -1,13 +1,13 @@
 import argparse
 from random import randint
-import re
 import signal
 from sys import maxint
 
 from gevent import joinall, sleep, spawn
 import zmq.green as zmq
 
-from super_core import DeliveryHandler, InputSocketConfig, OutputSocketConfig
+from super_core import (ConnectionManager, DeliveryHandler,
+                        InputSocketConfig, OutputSocketConfig)
 from super_core import DEFAULT_INPUT_OPTIONS, DEFAULT_OUTPUT_OPTIONS
 from blade import Blade
 from brick import Brick
@@ -19,14 +19,12 @@ from scaffold import Scaffold
 __author__ = 'Raul Gonzalez'
 
 
-class Shaft(Scaffold):
+class Shaft(Scaffold, ConnectionManager):
     def __init__(self, **kwargs):
-        self._blades = dict()
+        ConnectionManager.__init__(self)
+
         self._bricks = list()
-        self._cargos = dict()
         self._cornerstone = None
-        self._output_sock = None
-        self._control_sock = None
 
         # configure the interrupt handling
         self._stop = True
@@ -35,22 +33,17 @@ class Shaft(Scaffold):
         #: a heartbeat interval that will be relaid to control channel
         self.heartbeat = 1
 
-        # create the zmq context for
-        self._zmq_ctx = zmq.Context()
-
         # set the default handler, if name has been assigned.
-        if not hasattr(self, '_command_handler'):
-            self._command_handler = self._default_command_handler
-
-        # construct the poller
-        self._poll = zmq.Poller()
+        self.register_command_handler(self._default_command_handler)
 
         Scaffold.__init__(self, **kwargs)
 
     def configuration_options(self, arg_parser=argparse.ArgumentParser()):
         assert arg_parser
 
-        arg_parser.add_argument('--heartbeat', type=int, default=self.heartbeat,
+        arg_parser.add_argument('--heartbeat',
+                                type=int,
+                                default=self.heartbeat,
                                 help='Set the heartbeat rate in seconds.')
 
     def configure(self, args=list()):
@@ -59,30 +52,24 @@ class Shaft(Scaffold):
         self.log.debug('... shaft configuration complete ...')
 
     def declare_blade(self, handler=None, socket_options=DEFAULT_INPUT_OPTIONS):
+        """
+
+        :param handler:
+        :type handler: MethodType or FunctionType
+        :param socket_options:
+        :type socket_options: dict
+        """
         if handler == None:
             raise ValueError('Must pass handler method to be called to accept '
                              'received Cargo object.')
 
         self.log.info('... Configuring socket options: %s', socket_options)
-        blade = Blade(shaft=self, handler=handler)
 
-        # create and store the socket
-        socket_config = InputSocketConfig(socket_options)
-        InputSocketConfig.validate(socket_config)
-        blade_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
-        blade_sock.linger = socket_config.linger
+        blade_sock, socket_config = self.get_input_socket(socket_options)
 
-        if socket_config.sock_bind:
-            if socket_config.url.endswith('*'):
-                blade.port = blade_sock.bind_to_random_port(socket_config.url,
-                                                            min_port=200000,
-                                                            max_port=200500)
-            else:
-                blade_sock.bind(socket_config.url)
-        else:
-            blade_sock.connect(socket_config.url)
-
+        blade = Blade(handler=handler, socket_config=socket_config)
         self._blades[blade] = (blade_sock, socket_config)
+
         return blade
 
     def declare_brick(self, target, *args, **kwargs):
@@ -97,36 +84,16 @@ class Shaft(Scaffold):
 
         self.log.info('... Configuring cargo socket: %s', socket_options)
 
-        # create and store the socket
-        socket_config = OutputSocketConfig(socket_options)
-        OutputSocketConfig.validate(socket_config)
-        cargo_sock = self._zmq_ctx.socket(socket_config.zmq_sock_type)
-        cargo_sock.linger = socket_config.linger
-
-        port = None
-        if socket_config.sock_bind:
-            if socket_config.url.endswith('*'):
-                port = cargo_sock.bind_to_random_port(socket_config.url,
-                                                      min_port=200501,
-                                                      max_port=300000)
-            else:
-                cargo_sock.bind(socket_config.url)
-        else:
-            cargo_sock.connect(socket_config.url)
-
-        # ensure the socket can be used for sending
-        self._poll.register(cargo_sock, zmq.POLLOUT)
-
-        # actual creation and recording of Cargo
-        if not port:
-            port = re.match('.*?([0-9]+)$', socket_config.url).group(1)
 
         # abstract handle to allow cargo instance to deliver a message
         delivery_key = randint(-maxint - 1, maxint)
         delivery_handler = DeliveryHandler(delivery_key=delivery_key,
                                            send_func=self.send_crate)
 
-        cargo = Cargo(delivery_handle=delivery_handler.send_crate, port=port)
+        cargo_sock, socket_config = self.get_output_sock(socket_options)
+
+        cargo = Cargo(delivery_handle=delivery_handler.send_crate,
+                      socket_config=socket_config)
         self._cargos[delivery_key] = (cargo_sock, socket_config)
         return cargo
 
