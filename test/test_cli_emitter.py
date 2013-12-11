@@ -10,27 +10,27 @@ __author__ = 'Raul Gonzalez'
 
 
 class TestCliEmitter(WindmillTestCase):
-  def setUp(self):
-    self.zmq_ctx = zmq.Context()
+    def setUp(self):
+        self.zmq_ctx = zmq.Context()
 
-  def tearDown(self):
-    self.zmq_ctx.destroy()
+    def tearDown(self):
+        self.zmq_ctx.destroy()
 
 
-  def test_default_behavior(self):
-    pull_sock = self.zmq_ctx.socket(zmq.PULL)
-    pull_sock.bind('tcp://*:60053')
+    def test_default_behavior(self):
+        pull_sock = self.zmq_ctx.socket(zmq.PULL)
+        pull_sock.bind('tcp://*:60053')
 
-    sleep(0)
+        sleep(0)
 
-    the_spawn, cli_emitter = spawn_windmill(CliEmitter)
+        the_spawn, cli_emitter = spawn_windmill(CliEmitter)
 
-    msg = pull_sock.recv_multipart()
+        msg = pull_sock.recv_multipart()
 
-    self.assertIsNotNone(msg)
+        self.assertIsNotNone(msg)
 
-    self.assertFalse(cli_emitter.is_stopped())
+        self.assertFalse(cli_emitter.is_stopped())
 
-    joinall([the_spawn], timeout=0.1)
+        joinall([the_spawn], timeout=0.1)
 
-    self.assertTrue(cli_emitter.is_stopped)
+        self.assertTrue(cli_emitter.is_stopped)
