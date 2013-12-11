@@ -70,7 +70,8 @@ class Miller(object):
 
         :title:__copy_property_values__ Method
 
-        :param src: The source object that is to be inspected for property values.
+        :param src: The source object that is to be inspected for property
+        values.
         :type src: Object that supports hasattr() method.
         :param target: The target object that will be modified with values found
         in src.
@@ -80,7 +81,8 @@ class Miller(object):
         :type property_names: List or set of string property names.
 
         The *__copy_property_values__* method will only copy the values from src
-        when a property name is found in the src. In cases where a property value
+        when a property name is found in the src. In cases where a property
+        value
         is not found in the src object, then no change to the target object is
         made.
 
@@ -114,7 +116,8 @@ class Miller(object):
         :return: An empty obect that supports assigning properties.
 
         It is not valid to create a python instance of *object* for use as a
-        property bag. The underlying reason is that there is no __dict__ property
+        property bag. The underlying reason is that there is no __dict__
+        property
         assigned to an instance of object - hence the inability for an object to
         hold an attribute assignment.
 
@@ -183,7 +186,8 @@ class Miller(object):
 
         In actual usage, declare a Miller derived child class with a target
         function. It is possible to have more than one ancestor class with the
-        target function defined. The *__invoke_method_on_children__* will execute
+        target function defined. The *__invoke_method_on_children__* will
+        execute
         the function on each of the child classes.
 
         >>> class Bar(Miller):
@@ -199,7 +203,8 @@ class Miller(object):
         >>> bar.__invoke_method_on_children__(func_name='the_func', **kwargs)
         a_key: a_value
         >>> # Simply pass the argument keyword and value
-        >>> bar.__invoke_method_on_children__(func_name='the_func', a_key='value')
+        >>> bar.__invoke_method_on_children__(
+        ...     func_name='the_func', a_key='value')
         a_key: value
         """
         if func_name is None:
@@ -214,17 +219,23 @@ class Miller(object):
 
         while len(class_stack) is not 0:
             base = class_stack.pop()
-            if func_name in base.__dict__: # check the func exist on class instance
+            if func_name in base.__dict__: # check the func exist on class
+            # instance
                 func = getattr(base, func_name)
-                func(self, *args, **kwargs) # This is the function getting invoked
+                func(self, *args,
+                     **kwargs) # This is the function getting invoked
 
-    def __set_attrs_from__dict__(target=None, src_dict=dict()):
+    def __set_attrs_from__dict__(target=None, src_dict=None):
         """
+
 
         :param target:
-        :param src_dic:
+        :type target: object
+        :param src_dict:
+        :type src_dict: dict
         :return:
         """
+        if not src_dict: src_dict = dict()
         assert target
 
         for name, value in src_dict.items():
@@ -237,7 +248,7 @@ class Miller(object):
         value to the given target, if the property does NOT exist.
 
         :param target: The target object that is to have name values applied.
-        :type target: Object that supports ``hasattr`` and ``setattr`` methods.
+        :type target: object, must support ``hasattr`` and ``setattr`` methods.
         :param attr_list: A list of name-value tuple.
         :type attr_list: [('name', some_value), ...]
         :return: None

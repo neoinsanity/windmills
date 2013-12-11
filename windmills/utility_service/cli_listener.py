@@ -21,7 +21,8 @@ class CliListener(Shaft):
         assert arg_parser
 
         arg_parser.add_argument('-f', '--file',
-                                help='A file to append incoming messages by line.')
+                                help='A file to append incoming messages by '
+                                     'line.')
 
     def configure(self, args=list()):
         assert args

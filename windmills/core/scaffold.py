@@ -131,7 +131,8 @@ output.
 
 For example::
 
-  2012-12-02 03:26:03,030 - <name> - INFO - Logging configured for: VentilatorWindmill
+  2012-12-02 03:26:03,030 - <name> - INFO - Logging configured for:
+  VentilatorWindmill
 
 The <name> value will be assigned by default to the instance class utilizing
 *Scaffold*, but will be overridden by the use of the '--app_name <name>'
@@ -178,7 +179,8 @@ class Scaffold(Miller):
     *Scaffold* supports the following command line options::
 
       usage: <some_class>.py [-h] [--log_level {debug,info,warn,error}]
-                          [--log_path LOG_PATH] [--app_name APP_NAME] [--verbose]
+                          [--log_path LOG_PATH] [--app_name APP_NAME] [
+                          --verbose]
 
       optional arguments:
         -h, --help            show this help message and exit
@@ -189,7 +191,8 @@ class Scaffold(Miller):
                               with a ".log", then the path will assume a file
                               path.
         --name NAME           This will set the name for the current instance.
-                              The name is used for both log output and zmq socket
+                              The name is used for both log output and zmq
+                              socket
                               identification
         --verbose             Enable verbose log output to console. Useful for
                               debugging.
@@ -291,7 +294,8 @@ class Scaffold(Miller):
         self._execute_configuration(argv)
 
     def configuration_options(self, arg_parser=argparse.ArgumentParser()):
-        """This method will be called to get the *Scaffold* configuration options.
+        """This method will be called to get the *Scaffold* configuration
+        options.
 
         :param arg_parser: An *ArgumentParser* instance to add configuration
                            options.
@@ -301,7 +305,8 @@ class Scaffold(Miller):
         arg_parser.add_argument('--app_name',
                                 default=self.app_name,
                                 help='This will set the name for the current '
-                                     'instance. This will be reflected in the log '
+                                     'instance. This will be reflected in the '
+                                     'log '
                                      'output.')
         arg_parser.add_argument('--log_level',
                                 default=self.log_level,
@@ -310,8 +315,10 @@ class Scaffold(Miller):
         arg_parser.add_argument('--log_path',
                                 default=self.log_path,
                                 help='Set the path for log output. The default '
-                                     'file created is "<log_path>/<app_name>.log"'
-                                     '. If the path ends with a ".log" extension,'
+                                     'file created is "<log_path>/<app_name>'
+                                     '.log"'
+                                     '. If the path ends with a ".log" '
+                                     'extension,'
                                      ' then the path be a target file.')
         arg_parser.add_argument('--verbose',
                                 action='store_true',
@@ -345,14 +352,16 @@ class Scaffold(Miller):
         instance. This includes setting up logging to files and console. The
         configured log will be available to the service instance with `self.log`
         """
-        self.log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level, logging.ERROR)
+        self.log_level = Scaffold.LOG_LEVEL_MAP.get(self.log_level,
+                                                    logging.ERROR)
 
         # if log level is debug, then we add source information to log output
         formatter = logging.Formatter(
             '%(asctime)s -%(name)s - %(levelname)s -- %(message)s')
         if self.log_level == logging.DEBUG:
             formatter = logging.Formatter(
-                '%(asctime)s -%(name)s - %(levelname)s -- %(pathname)s:%(lineno)d '
+                '%(asctime)s -%(name)s - %(levelname)s -- %(pathname)s:%('
+                'lineno)d '
                 '-- %(message)s')
 
         # assign the windmill instance logger

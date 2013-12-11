@@ -16,21 +16,3 @@ class TestCliEmitter(WindmillTestCase):
     def tearDown(self):
         self.zmq_ctx.destroy()
 
-
-    def test_default_behavior(self):
-        pull_sock = self.zmq_ctx.socket(zmq.PULL)
-        pull_sock.bind('tcp://*:60053')
-
-        sleep(0)
-
-        the_spawn, cli_emitter = spawn_windmill(CliEmitter)
-
-        msg = pull_sock.recv_multipart()
-
-        self.assertIsNotNone(msg)
-
-        self.assertFalse(cli_emitter.is_stopped())
-
-        joinall([the_spawn], timeout=0.1)
-
-        self.assertTrue(cli_emitter.is_stopped)

@@ -107,7 +107,8 @@ class Shaft(Scaffold):
         if socket_config.sock_bind:
             if socket_config.url.endswith('*'):
                 port = cargo_sock.bind_to_random_port(socket_config.url,
-                                                      min_port=200501, max_port=300000)
+                                                      min_port=200501,
+                                                      max_port=300000)
             else:
                 cargo_sock.bind(socket_config.url)
         else:
@@ -214,9 +215,7 @@ class Shaft(Scaffold):
         for sock in socks_handler_map.keys():
             sock.close()
 
-        print 'cargos', self._cargos
-
-        for sock, socket_config in self._cargos.items():
+        for sock, socket_config in self._cargos.values():
             sock.close()
 
         self.log.info('Run terminated for %s', self.app_name)
@@ -239,9 +238,11 @@ class Shaft(Scaffold):
 
                 for input_sock in socks_handler_map.keys():
                     if socks.get(input_sock) == zmq.POLLIN:
-                        msg = socks_handler_map[input_sock].recv_handler(input_sock)
+                        msg = socks_handler_map[input_sock].recv_handler(
+                            input_sock)
 
-                if (self._control_sock and socks.get(self._control_sock) == zmq.POLLIN):
+                if (self._control_sock and socks.get(
+                        self._control_sock) == zmq.POLLIN):
                     msg = self._control_sock.recv()
                     self.log.info('Command msg: %s', msg)
                     if self._command_handler is not None:
@@ -259,8 +260,9 @@ class Shaft(Scaffold):
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions
-                    self.log.error('Unhandled exception in run execution:%d - %s' % (
-                        ze.errno, ze.strerror))
+                    self.log.error(
+                        'Unhandled exception in run execution:%d - %s' % (
+                            ze.errno, ze.strerror))
                     exit(-1)
 
 

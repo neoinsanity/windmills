@@ -20,33 +20,33 @@ class CliEmitter(Shaft):
     def configuration_options(self, arg_parser=None):
         assert arg_parser
 
-        arg_parser.add_argument('-d', '--delay',
-                                type=int,
-                                default=self.delay,
-                                help='The delay in in seconds for transmission of '
-                                     'multi-line file or repeat messages. A '
-                                     '0 delay will disable any delay, '
-                                     'A negative delay value is not allowed.')
-        arg_parser.add_argument('-f', '--file',
-                                default=self.file,
-                                help='Use of this flag will cause cli-emitter'
-                                     ' to transmit each line of a given file.'
-                                     ' Use of this argument will cause '
-                                     '-m|--message argument to be ignored.')
-        arg_parser.add_argument('-m', '--message',
-                                default=self.message,
-                                type=str,
-                                help="The message that the emitter will send "
-                                     "on the output socket. If the -f|--file"
-                                     " flag is used, then this message flag "
-                                     "is ignored.")
-        arg_parser.add_argument('-r', '--repeat',
-                                default=self.repeat,
-                                action='store_true',
-                                help='This flag will cause cli-emitter to '
-                                     'repeat transmission of messages. In the'
-                                     ' case of a file, cli-emitter will loop '
-                                     'through the contents of the file.')
+        arg_parser.add_argument(
+            '-d', '--delay',
+            type=int,
+            default=self.delay,
+            help='The delay in in seconds for transmission of multi-line file'
+                 ' or repeat messages. A 0 delay will disable any delay, A '
+                 'negative delay value is not allowed.')
+        arg_parser.add_argument(
+            '-f', '--file',
+            default=self.file,
+            help='Use of this flag will cause cli-emitter to transmit each line'
+                 ' of a given file. Use of this argument will cause '
+                 '-m|--message argument to be ignored.')
+        arg_parser.add_argument(
+            '-m', '--message',
+            default=self.message,
+            type=str,
+            help='The message that the emitter will send on the output socket. '
+                 'If the -f|--file flag is used, then this message flag is '
+                 'ignored.')
+        arg_parser.add_argument(
+            '-r', '--repeat',
+            default=self.repeat,
+            action='store_true',
+            help='This flag will cause cli-emitter to repeat transmission of '
+                 'messages. In the case of a file, cli-emitter will loop '
+                 'through the contents of the file.')
 
     def configure(self, args=list()):
         assert args
@@ -79,7 +79,6 @@ class CliEmitter(Shaft):
             self.log.exception('Unknown Exception: %s', e)
             raise e
         finally:
-            self.kill()
             self.log.info('CliEmitter shutting down.')
 
 

@@ -30,34 +30,6 @@ class TestCliListener(WindmillTestCase):
 
         self.zmq_ctx.destroy()
 
-    def test_default_behavior(self):
-        """Tests the default behavior of the CliListener.
-
-        This test is validated by setting --verbose on the CliListener instance,
-        and then capturing the log output to stdout.
-        """
-        with StdOutCapture() as output:
-            the_spawn, cli_listener = spawn_windmill(CliListener)
-            self.assertFalse(cli_listener.is_stopped())
-
-            # test message
-            crate = Crate(msg_data='hola')
-            self.sock_map['PUSH'].send(crate.dump)
-
-            # wait on the message delivery
-            joinall([the_spawn, ], timeout=0.1)
-
-            # test shutdown
-            cli_listener.kill()
-            sleep(0)  # yield to allow shutdown
-
-            self.assertTrue(cli_listener.is_stopped())
-
-        self.assertEqual(
-            output,
-            ['{"call_ctx": {}, "msg_ctx": {}, "msg_data": "hola"}'],
-            ('Unexpected output to stdout: %s' % output))
-
     def test_file_output(self):
 
         # ensure the file does not exist, to prevent false positives
