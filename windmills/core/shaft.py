@@ -101,38 +101,6 @@ class Shaft(ShaftBase):
     def declare_cornerstone(self, target, *args, **kwargs):
         self._cornerstone = Cornerstone(target, *args, **kwargs)
 
-    def send_crate(self, delivery_key, crate):
-        assert delivery_key
-        assert crate
-
-        #todo: raul -  create socket/retrieve socket for now
-        sock, socket_config = self._cargos.get(delivery_key)
-
-        #todo: raul - then send crate
-        msg = crate.dump
-
-        for cnt in range(3):
-            self.log.debug('poll check on socket(%s): %s', cnt, sock)
-            socks = dict(self._poll.poll())
-            if socks.get(sock) == zmq.POLLOUT:
-                self.send(msg, sock, socket_config)
-                break
-
-    def send(self, msg, sock, sock_config):
-        assert msg
-
-        if not sock_config.no_block_send:
-            self.log.debug('Block sending: %s', msg)
-            sock.send_multipart([msg])
-        else:
-            self.log.debug('No Block sending: %s', msg)
-            try:
-                sock.send_multipart([msg], zmq.NOBLOCK)
-            except zmq.ZMQError as ze:
-                self.log.exception('ZMQ error detection: %s', ze)
-            except Exception as e:
-                self.log.exception('Unexpected exception: %s', e)
-
     def is_stopped(self):
         return self._stop
 
