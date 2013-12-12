@@ -19,6 +19,7 @@ setup(
               ' based solutions.',
   packages=['windmills',
             'windmills.core',
+            'windmills.core.super_core',
             'windmills.utility_service'],
   install_requires=requires,
 )

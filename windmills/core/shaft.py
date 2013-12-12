@@ -13,15 +13,15 @@ from blade import Blade
 from brick import Brick
 from cargo import Cargo
 from cornerstone import Cornerstone
-from scaffold import Scaffold
+from shaft_base import ShaftBase
 
+__all__ = ['Shaft']
 
 __author__ = 'Raul Gonzalez'
 
 
-class Shaft(Scaffold, ConnectionManager):
+class Shaft(ShaftBase):
     def __init__(self, **kwargs):
-        ConnectionManager.__init__(self)
 
         self._bricks = list()
         self._cornerstone = None
@@ -33,10 +33,11 @@ class Shaft(Scaffold, ConnectionManager):
         #: a heartbeat interval that will be relaid to control channel
         self.heartbeat = 1
 
+        ShaftBase.__init__(self, **kwargs)
+
         # set the default handler, if name has been assigned.
         self.register_command_handler(self._default_command_handler)
 
-        Scaffold.__init__(self, **kwargs)
 
     def configuration_options(self, arg_parser=argparse.ArgumentParser()):
         assert arg_parser
