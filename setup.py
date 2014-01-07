@@ -5,6 +5,7 @@ requires = [
   'gevent==1.0',
   'greenlet==0.4.1',
   'pyzmq==14.0.1',
+  'schematics==0.9-4',
   'wsgiref==0.1.2',
 ]
 
