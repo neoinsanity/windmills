@@ -17,7 +17,7 @@
         <section id="main">
             <ul id="message-list">
                 {{#each}}
-                <li class="send">
+                <li {{bind-attr class="isSent:sent"}}>
                     <input type="checkbox" class="toggle">
                     <label>{{body}}</label><button class="destroy"></button>
                 </li>

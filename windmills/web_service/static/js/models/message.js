@@ -7,16 +7,16 @@ WebEmitter.Message.FIXTURES = [
     {
         id: 1,
         body: 'Hola',
-        sent: true
+        isSent: true
     },
     {
         id: 2,
         body: '...',
-        sent: false
+        isSent: false
     },
     {
         id: 3,
         body: 'testing 1, 2, 3',
-        sent: false
+        isSent: false
     }
 ];

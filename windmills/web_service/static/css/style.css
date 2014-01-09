@@ -250,7 +250,7 @@ label[for='toggle-all'] {
 	transition: color 0.4s;
 }
 
-#message-list li.completed label {
+#message-list li.sent label {
 	color: #a9a9a9;
 	text-decoration: line-through;
 }
