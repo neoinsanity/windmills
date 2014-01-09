@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="static/css/style.css">
-    <title>Web Emitter</title>
+    <title>Web Emitter (( key ))</title>
 </head>
 <body>
 <script type="text/x-handlebars" data-template-name="messages">
@@ -16,18 +16,12 @@
 
         <section id="main">
             <ul id="message-list">
+                {{#each}}
                 <li class="send">
                     <input type="checkbox" class="toggle">
-                    <label>Send emitter message</label><button class="destroy"></button>
+                    <label>{{body}}</label><button class="destroy"></button>
                 </li>
-                <li>
-                    <input type="checkbox" class="toggle">
-                    <label>...</label><button class="destroy"></button>
-                </li>
-                <li>
-                    <input type="checkbox" class="toggle">
-                    <label>Doe!</label><button class="destroy"></button>
-                </li>
+                {{/each}}
             </ul>
 
             <input type="checkbox" id="toggle-all">
@@ -66,5 +60,6 @@
 <script src="static/js/ember-data-1.0b4.js"></script>
 <script src="static/js/web-emitter-app.js"></script>
 <script src="static/js/web-emitter-route.js"></script>
+<script src="static/js/models/message.js"></script>
 </body>
 </html>

@@ -26,26 +26,43 @@ class WebEmitter(Shaft):
 
     def configure(self, args=list()):
         assert args
-        config = Configurator()
+        config = Configurator(settings={
+            'jinja2.comment_start_string': '(#',
+            'jinja2.comment_end_string': '#)',
+            'jinja2.variable_start_string': '((',
+            'jinja2.variable_end_string': '))',
+        })
+
+        # Configure jinja
         config.include('pyramid_jinja2')
         config.add_jinja2_search_path('windmills.web_service:templates')
+
+        # Configure static views.
         config.add_static_view('static', 'static', cache_max_age=3600)
+
+        # Configure a request method to access application context
         config.add_request_method(self.appctx)
+
+        # Configure Route and View combinations
         config.add_route('hello', '/hello')
         config.add_view(self.hello_world, route_name='hello')
         config.add_route('root_url', '/')
         config.add_view(self.root_url, route_name='root_url', renderer='web_emitter.jinja2')
+
+        # Generate the app and start the server.
         app = config.make_wsgi_app()
         self._wsgi_server = WSGIServer(('', 8000), app)
-        self._wsgi_server.serve_forever()
+        self._wsgi_server.serve_forever()  # todo: raul - need to make this non blocking
 
     def run_loop(self):
         self.log.info('... Entering run loop ...')
 
-    def root_url(self, request):
-        return {'key': 'value'}
+    @staticmethod
+    def root_url(request):
+        return {'key': '(Jinja2 Test String)'}
 
-    def hello_world(self, request):
+    @staticmethod
+    def hello_world(request):
         request.appctx().log.debug('request: %s', request)
         return Response('Hello World')
 
