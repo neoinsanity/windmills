@@ -26,7 +26,7 @@ Requirements:
     environment manually. This amounts to executing the commands in the setup
     script minus the virutalenv specific commands. To install virtualenv,
     see the installation instructions on the virtualenv website.
-    https://pypi.python.org/pypi/virtualenv
+    http://www.virtualenv.org/
 
   - libevent => 2.0.21
     For OS X users, you will need to install this library using Homebrew. The
