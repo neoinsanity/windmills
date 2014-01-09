@@ -29,6 +29,7 @@ class WebEmitter(Shaft):
         config = Configurator()
         config.include('pyramid_jinja2')
         config.add_jinja2_search_path('windmills.web_service:templates')
+        config.add_static_view('static', 'static', cache_max_age=3600)
         config.add_request_method(self.appctx)
         config.add_route('hello', '/hello')
         config.add_view(self.hello_world, route_name='hello')

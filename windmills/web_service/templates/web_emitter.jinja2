@@ -1,13 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="static/css/style.css">
     <title>Web Emitter</title>
 </head>
 <body>
+    <section id="web-emitter-app">
+        <header id="header">
+            <h1>Messages</h1>
+            <input type="text" id="new-message" placeholder="hola"/>
+        </header>
 
-<h1>Web Emitter</h1>
+        <section id="main">
+            <ul id="message-list">
+                <li class="send">
+                    <input type="checkbox" class="toggle">
+                    <label>Send emitter message</label><button class="destroy"></button>
+                </li>
+                <li>
+                    <input type="checkbox" class="toggle">
+                    <label>...</label><button class="destroy"></button>
+                </li>
+                <li>
+                    <input type="checkbox" class="toggle">
+                    <label>Doe!</label><button class="destroy"></button>
+                </li>
+            </ul>
 
-    {{ key }}
+            <input type="checkbox" id="toggle-all">
+        </section>
+    </section>
 
-</body>
+    <footer id="footer">
+        <span id="message-count">
+            <strong>2</strong> messages sent.
+        </span>
+        <ul id="filters">
+            <li>
+                <a href="all" class="selected">All</a>
+            </li>
+            <li>
+                <a href="active">Active</a>
+            </li>
+            <li>
+                <a href="completed">Completed</a>
+            </li>
+        </ul>
+
+        <button id="clear-completed">
+            Clear sent (1)
+        </button>
+    </footer>
+
+    <footer id="info">
+        <p>Double-click to edit a message</p>
+    </footer>
 </html>

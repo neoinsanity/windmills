@@ -5,3 +5,4 @@ windmills.egg-info
 COVERAGE_REPORT/
 TEST_OUT/
 .idea/
+.DS_Store
