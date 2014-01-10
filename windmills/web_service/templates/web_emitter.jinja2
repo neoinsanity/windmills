@@ -11,15 +11,23 @@
     <section id="web-emitter-app">
         <header id="header">
             <h1>Messages</h1>
-            {{input type="text" id="new-message" placeholder="Type a message" value=newMessage action="createMessage"}}
+            {{input type="text"
+                    id="new-message"
+                    placeholder="Type a message"
+                    value=newMessage
+                    action="createMessage"}}
         </header>
 
         <section id="main">
             <ul id="message-list">
-                {{#each}}
-                <li {{bind-attr class="isSent:sent"}}>
-                    <input type="checkbox" class="toggle">
-                    <label>{{body}}</label><button class="destroy"></button>
+                {{#each itemController="message"}}
+                <li {{bind-attr class="isSent:sent isEditing:editing"}}>
+                    {{#if isEditing}}
+                        <input class="edit">
+                    {{else}}
+                        {{input type="checkbox" checked=isSent class="toggle"}}
+                        <label {{action "editMessage" on="doubleClick"}}>{{ body }}</label><button class="destroy"></button>
+                    {{/if}}
                 </li>
                 {{/each}}
             </ul>
@@ -30,7 +38,7 @@
 
     <footer id="footer">
         <span id="message-count">
-            <strong>2</strong> messages sent.
+            <strong>{{ remaining }}</strong> {{ inflection }} sent.
         </span>
         <ul id="filters">
             <li>
@@ -52,6 +60,7 @@
     <footer id="info">
         <p>Double-click to edit a message</p>
     </footer>
+
 
 </script>
 <script src="static/js/jquery-1.10.2.js"></script>

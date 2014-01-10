@@ -20,11 +20,41 @@ WebEmitter.MessagesController = Ember.ArrayController.extend({
                 isSent: false,
             });
 
-            // clear the "New Message" text field
+            // ueclear the "New Message" text field
             this.set('newMessage', '');
 
             // save the new modal
             message.save();
         }
-    }
+    },
+    remaining: function () {
+        return this.filterBy('isSent', false).get('length');
+    }.property('@each.isSent'),
+    inflection: function () {
+        var remaining = this.get('remaining');
+        return remaining === 1 ? 'message' : 'messages';
+    }.property('remaining')
+});
+
+WebEmitter.MessageController = Ember.ObjectController.extend({
+    actions: {
+        editMessage: function () {
+            this.set('isEditing', true);
+        }
+    },
+
+    isEditing: false,
+
+    isSent: function (key, value) {
+        var model = this.get('model');
+
+        if (value === undefined) {
+            // property being used as a getter
+            return model.get('isSent');
+        } else {
+            model.set('isSent', value);
+            model.save();
+            return value;
+        }
+    }.property('model.isSent')
 });
