@@ -13,7 +13,7 @@
         <section id="main">
             {{outlet}}
 
-            <input type="checkbox" id="toggle-all">
+            {{input type="checkbox" id="toggle-all" checked=allAreDone}}
         </section>
     </section>
 
@@ -33,9 +33,11 @@
             </li>
         </ul>
 
-        <button id="clear-completed">
-            Clear sent (1)
-        </button>
+        {{#if hasSent}}
+            <button id="clear-sent" {{action "clearSent"}}>
+                Clear sent ({{sent}})
+            </button>
+        {{/if}}
     </footer>
 
     <footer id="info">

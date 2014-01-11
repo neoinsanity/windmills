@@ -25,15 +25,40 @@ WebEmitter.MessagesController = Ember.ArrayController.extend({
 
             // save the new modal
             message.save();
+        },
+        clearSent: function () {
+            var sent = this.filterBy('isSent', true);
+            sent.invoke('deleteRecord');
+            sent.invoke('save');
         }
     },
+
     remaining: function () {
         return this.filterBy('isSent', false).get('length');
     }.property('@each.isSent'),
+
     inflection: function () {
         var remaining = this.get('remaining');
         return remaining === 1 ? 'message' : 'messages';
-    }.property('remaining')
+    }.property('remaining'),
+
+    hasSent: function () {
+        return this.get('sent') > 0;
+    }.property('sent'),
+
+    sent: function () {
+        return this.filterBy('isSent', true).get('length');
+    }.property('@each.isSent'),
+
+    allAreDone: function (key, value) {
+        if (value === undefined) {
+            return this.get('length') && this.isEvery('isSent');
+        } else {
+            this.setEach('isSent', value);
+            this.invoke('save');
+            return value;
+        }
+    }.property('@each.isSent')
 });
 
 WebEmitter.MessageController = Ember.ObjectController.extend({
@@ -41,16 +66,16 @@ WebEmitter.MessageController = Ember.ObjectController.extend({
         editMessage: function () {
             this.set('isEditing', true);
         },
-        acceptChanges: function(){
+        acceptChanges: function () {
             this.set('isEditing', false);
 
-            if(Ember.isEmpty(this.get('model.body'))){
+            if (Ember.isEmpty(this.get('model.body'))) {
                 this.send('removeMessage');
-            }else{
+            } else {
                 this.get('model').save();
             }
         },
-        removeMessage: function(){
+        removeMessage: function () {
             var message = this.get('model');
             message.deleteRecord();
             message.save();
