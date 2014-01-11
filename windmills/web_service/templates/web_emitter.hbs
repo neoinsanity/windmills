@@ -1,0 +1,62 @@
+<script type="text/x-handlebars" data-template-name="messages">
+
+    <section id="web-emitter-app">
+        <header id="header">
+            <h1>Messages</h1>
+            {{input type="text"
+            id="new-message"
+            placeholder="Type a message"
+            value=newMessage
+            action="createMessage"}}
+        </header>
+
+        <section id="main">
+            <ul id="message-list">
+                {{#each itemController="message"}}
+                    <li {{bind-attr class="isSent:sent isEditing:editing"}}>
+                        {{#if isEditing}}
+                            {{edit-message class="edit"
+                            value=body
+                            focus-out="acceptChanges"
+                            insert-newline="acceptChanges"
+                            }}
+                        {{else}}
+                            {{input type="checkbox" checked=isSent class="toggle"}}
+                            <label {{action "editMessage" on="doubleClick"}}>{{ body }}</label>
+                            <button {{action "removeMessage"}} class="destroy"></button>
+                        {{/if}}
+                    </li>
+                {{/each}}
+            </ul>
+
+            <input type="checkbox" id="toggle-all">
+        </section>
+    </section>
+
+    <footer id="footer">
+        <span id="message-count">
+            <strong>{{ remaining }}</strong> {{ inflection }} sent.
+        </span>
+        <ul id="filters">
+            <li>
+                <a href="all" class="selected">All</a>
+            </li>
+            <li>
+                <a href="active">Active</a>
+            </li>
+            <li>
+                <a href="completed">Completed</a>
+            </li>
+        </ul>
+
+        <button id="clear-completed">
+            Clear sent (1)
+        </button>
+    </footer>
+
+    <footer id="info">
+        <p>Double-click to edit a message</p>
+    </footer>
+
+
+</script>

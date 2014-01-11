@@ -40,6 +40,20 @@ WebEmitter.MessageController = Ember.ObjectController.extend({
     actions: {
         editMessage: function () {
             this.set('isEditing', true);
+        },
+        acceptChanges: function(){
+            this.set('isEditing', false);
+
+            if(Ember.isEmpty(this.get('model.body'))){
+                this.send('removeMessage');
+            }else{
+                this.get('model').save();
+            }
+        },
+        removeMessage: function(){
+            var message = this.get('model');
+            message.deleteRecord();
+            message.save();
         }
     },
 
