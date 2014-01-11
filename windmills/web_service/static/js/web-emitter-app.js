@@ -2,7 +2,9 @@ window.WebEmitter = Ember.Application.create();
 
 WebEmitter.Store = DS.Store.extend({
     revision: 13,
-    adapter: DS.FixtureAdapter
+    adapter: DS.LSAdapter.extend({
+        namespace: 'messages-emberjs'
+    })
 });
 
 WebEmitter.MessagesController = Ember.ArrayController.extend({
