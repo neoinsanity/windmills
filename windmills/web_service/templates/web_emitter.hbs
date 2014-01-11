@@ -11,41 +11,25 @@
         </header>
 
         <section id="main">
-            <ul id="message-list">
-                {{#each itemController="message"}}
-                    <li {{bind-attr class="isSent:sent isEditing:editing"}}>
-                        {{#if isEditing}}
-                            {{edit-message class="edit"
-                            value=body
-                            focus-out="acceptChanges"
-                            insert-newline="acceptChanges"
-                            }}
-                        {{else}}
-                            {{input type="checkbox" checked=isSent class="toggle"}}
-                            <label {{action "editMessage" on="doubleClick"}}>{{ body }}</label>
-                            <button {{action "removeMessage"}} class="destroy"></button>
-                        {{/if}}
-                    </li>
-                {{/each}}
-            </ul>
+            {{outlet}}
 
             <input type="checkbox" id="toggle-all">
         </section>
     </section>
 
     <footer id="footer">
-        <span id="message-count">
-            <strong>{{ remaining }}</strong> {{ inflection }} sent.
-        </span>
+    <span id="message-count">
+        <strong>{{ remaining }}</strong> {{ inflection }} sent.
+    </span>
         <ul id="filters">
             <li>
-                <a href="all" class="selected">All</a>
+                {{#link-to "messages.index" activeClass="selected"}}All{{/link-to}}
             </li>
             <li>
-                <a href="active">Active</a>
+                {{#link-to "messages.active" activeClass="selected"}}Active{{/link-to}}
             </li>
             <li>
-                <a href="completed">Completed</a>
+                {{#link-to "messages.completed" activeClass="selected"}}Completed{{/link-to}}
             </li>
         </ul>
 
@@ -58,5 +42,23 @@
         <p>Double-click to edit a message</p>
     </footer>
 
+</script>
 
+<script type="text/x-handlebars" data-template-name="messages/index">
+    <ui id="message-list">
+        {{#each itemController="message"}}
+            <li {{bind-attr class="isSent:sent isEditing:editing"}}>
+                {{#if isEditing}}
+                    {{edit-message class="edit"
+                    value=body
+                    focus-out="acceptChanges"
+                    insert-newline="acceptChanges"}}
+                {{else}}
+                    {{input class="toggle" type="checkbox" checked=isSent}}
+                    <label {{action "editMessage" on="doubleClick"}}>{{body}}</label>
+                    <button class="destroy" {{action "removeMessage"}}></button>
+                {{/if}}
+            </li>
+        {{/each}}
+    </ui>
 </script>
