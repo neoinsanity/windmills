@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from setuptools import setup
 
 # The list of required packages to run Windmills.
