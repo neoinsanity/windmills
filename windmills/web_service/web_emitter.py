@@ -68,11 +68,9 @@ class WebEmitter(Shaft):
         config.add_request_method(self.appctx)
 
         # Configure Route and View combinations
-        config.add_route('hello', '/hello')
-        config.add_view(self.hello_world, route_name='hello')
         config.add_route('root_url', '/')
         config.add_view(self.root_url, route_name='root_url', renderer='web_emitter.jinja2')
-        config.add_route('send_msg', '/send_msg')
+        config.add_route('send_msg', '/send_message')
         config.add_view(self.send_msg, route_name='send_msg', request_method='POST',
                         renderer='json', accept='application/json')
 
@@ -87,11 +85,6 @@ class WebEmitter(Shaft):
     @staticmethod
     def root_url(request):
         return {'key': '(Jinja2 Test String)'}
-
-    @staticmethod
-    def hello_world(request):
-        request.appctx().log.debug('request: %s', request)
-        return Response('Hello World')
 
     @staticmethod
     @app_ctx_enabled(['cargo'])

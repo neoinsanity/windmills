@@ -56,7 +56,11 @@
                     focus-out="acceptChanges"
                     insert-newline="acceptChanges"}}
                 {{else}}
-                    {{input class="toggle" type="checkbox" checked=isSent}}
+                  {{#if isSent}}
+                    <button class="sent" {{action "resetMessage"}}></button>
+                  {{else}}
+                    <button class="send" {{action "sendMessage"}}></button>
+                  {{/if}}
                     <label {{action "editMessage" on="doubleClick"}}>{{body}}</label>
                     <button class="destroy" {{action "removeMessage"}}></button>
                 {{/if}}

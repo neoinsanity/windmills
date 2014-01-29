@@ -3,7 +3,7 @@ window.WebEmitter = Ember.Application.create();
 WebEmitter.Store = DS.Store.extend({
     revision: 13,
     adapter: DS.LSAdapter.extend({
-        namespace: 'messages-emberjs'
+        namespace: 'web-emitter-messages'
     })
 });
 
@@ -77,6 +77,23 @@ WebEmitter.MessageController = Ember.ObjectController.extend({
                 this.get('model').save();
             }
         },
+
+        sendMessage: function () {
+            var model = this.get('model');
+
+            data = model.getProperties('body');
+            $.post("/send_message", data);
+
+            model.set('isSent', true);
+            model.save();
+        },
+
+        resetMessage: function () {
+            var model = this.get('model');
+            model.set('isSent', false);
+            model.save();
+        },
+
         removeMessage: function () {
             var message = this.get('model');
             message.deleteRecord();
@@ -85,17 +102,4 @@ WebEmitter.MessageController = Ember.ObjectController.extend({
     },
 
     isEditing: false,
-
-    isSent: function (key, value) {
-        var model = this.get('model');
-
-        if (value === undefined) {
-            // property being used as a getter
-            return model.get('isSent');
-        } else {
-            model.set('isSent', value);
-            model.save();
-            return value;
-        }
-    }.property('model.isSent')
 });
