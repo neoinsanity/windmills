@@ -6,6 +6,40 @@ WebEmitter.Router.map(function () {
     });
 });
 
+WebEmitter.ApplicationRoute = Ember.Route.extend({
+   actions: {
+       openModal: function(modalName){
+           return this.render(modalName, {
+               into: 'application',
+               outlet: 'modal'
+           });
+       },
+
+       closeModal: function(){
+           return this.disconnectOutlet({
+               outlet: 'modal',
+               parentView: 'application'
+           })
+       }
+   }
+});
+
+WebEmitter.ModalController = Ember.ObjectController.extend({
+   actions: {
+       close: function(){
+           return this.send('closeModal');
+       }
+   }
+});
+
+WebEmitter.ModalDialogComponent = Ember.Component.extend({
+   actions: {
+       close: function(){
+           return this.sendAction();
+       }
+   }
+});
+
 WebEmitter.MessagesRoute = Ember.Route.extend({
     model: function () {
         return this.store.find('message');

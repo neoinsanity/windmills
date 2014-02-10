@@ -1,3 +1,8 @@
+<script type="text/x-handlebars">
+   {{outlet}}
+   {{outlet modal}}
+</script>
+
 <script type="text/x-handlebars" data-template-name="messages">
 
     <section id="web-emitter-app">
@@ -18,6 +23,8 @@
     </section>
 
     <footer id="footer">
+    <button {{action 'openModal' 'modal'}}>Open modal</button>
+
     <span id="message-count">
         <strong>{{ remaining }}</strong> {{ inflection }} sent.
     </span>
@@ -67,4 +74,20 @@
             </li>
         {{/each}}
     </ui>
+</script>
+
+<script type="text/x-handlebars" data-template-name="modal">
+   {{#modal-dialog action="close"}}
+       <h3>The Modal Dialog</h3>
+       <p>Yeah! I got here.</p>
+       <button {{action "close"}}>Done</button>
+   {{/modal-dialog}}
+</script>
+
+<script type="text/x-handlebars" id="components/modal-dialog">
+   <div class="overlay" {{action "close"}}>
+      <div class="modal" {{action bubbles=false}}>
+         {{yield}}
+      </div>
+   </div>
 </script>

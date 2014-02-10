@@ -34,6 +34,13 @@ body {
 	font-smoothing: antialiased;
 }
 
+.modal {
+    margin: 10px auto;
+    width: 300px;
+    background-color: #ffffff;
+    padding: 1em;
+}
+
 #web-emitter-app {
 	background: #fff;
 	background: rgba(255, 255, 255, 0.9);
