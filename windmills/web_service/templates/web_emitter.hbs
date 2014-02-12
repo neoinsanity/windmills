@@ -1,7 +1,3 @@
-<script type="text/x-handlebars">
-   {{outlet}}
-   {{outlet modal}}
-</script>
 
 <script type="text/x-handlebars" data-template-name="messages">
 
@@ -17,26 +13,29 @@
 
         <section id="main">
             {{outlet}}
+            {{outlet modal}}
 
             {{input type="checkbox" id="toggle-all" checked=allAreDone}}
         </section>
     </section>
 
     <footer id="footer">
-    <button {{action 'openModal' 'modal'}}>Open modal</button>
 
     <span id="message-count">
         <strong>{{ remaining }}</strong> {{ inflection }} sent.
     </span>
         <ul id="filters">
             <li>
-                {{#link-to "messages.index" activeClass="selected"}}All{{/link-to}}
+                {{#link-to "messages.index" activeClass="selected"}}
+                    All{{/link-to}}
             </li>
             <li>
-                {{#link-to "messages.active" activeClass="selected"}}Active{{/link-to}}
+                {{#link-to "messages.active" activeClass="selected"}}
+                    Active{{/link-to}}
             </li>
             <li>
-                {{#link-to "messages.completed" activeClass="selected"}}Completed{{/link-to}}
+                {{#link-to "messages.completed" activeClass="selected"}}
+                    Completed{{/link-to}}
             </li>
         </ul>
 
@@ -48,7 +47,7 @@
     </footer>
 
     <footer id="info">
-        <p>Double-click to edit a message</p>
+        <p>Click to edit a message</p>
     </footer>
 
 </script>
@@ -56,38 +55,35 @@
 <script type="text/x-handlebars" data-template-name="messages/index">
     <ui id="message-list">
         {{#each itemController="message"}}
-            <li {{bind-attr class="isSent:sent isEditing:editing"}}>
-                {{#if isEditing}}
-                    {{edit-message class="edit"
-                    value=body
-                    focus-out="acceptChanges"
-                    insert-newline="acceptChanges"}}
-                {{else}}
-                  {{#if isSent}}
+            <li {{bind-attr class="isSent:sent"}}>
+                {{#if isSent}}
                     <button class="sent" {{action "resetMessage"}}></button>
-                  {{else}}
+                {{else}}
                     <button class="send" {{action "sendMessage"}}></button>
-                  {{/if}}
-                    <label {{action "editMessage" on="doubleClick"}}>{{body}}</label>
-                    <button class="destroy" {{action "removeMessage"}}></button>
                 {{/if}}
+                <label {{action 'openModal' 'modal' model
+                on="click"}}>{{body}}</label>
+                <button class="destroy" {{action "removeMessage"}}></button>
             </li>
         {{/each}}
     </ui>
 </script>
 
 <script type="text/x-handlebars" data-template-name="modal">
-   {{#modal-dialog action="close"}}
-       <h3>The Modal Dialog</h3>
-       <p>Yeah! I got here.</p>
-       <button {{action "close"}}>Done</button>
-   {{/modal-dialog}}
+    {{#modal-dialog action="close"}}
+        <h2 class="modal-header">
+            Message Editor
+        </h2>
+        <p>Body</p>
+        <p>{{input value=body}}</p>
+        <button {{action "close"}}>Done</button>
+    {{/modal-dialog}}
 </script>
 
 <script type="text/x-handlebars" id="components/modal-dialog">
-   <div class="overlay" {{action "close"}}>
-      <div class="modal" {{action bubbles=false}}>
-         {{yield}}
-      </div>
-   </div>
+    <div class="overlay" {{action "close"}}>
+        <div class="modal" {{action bubbles=false}}>
+            {{yield}}
+        </div>
+    </div>
 </script>
