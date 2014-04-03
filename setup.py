@@ -4,10 +4,10 @@ from setuptools import setup
 # The list of required packages to run Windmills.
 requires = [
   'gevent==1.0',
-  'greenlet==0.4.1',
+  'greenlet==0.4.2',
   'pyramid==1.4.5',
-  'pyramid-jinja2==1.9',
-  'pyzmq==14.0.1',
+  'pyramid-jinja2==1.10',
+  'pyzmq==14.1.1',
   'schematics==0.9-4',
   'wsgiref==0.1.2',
 ]
