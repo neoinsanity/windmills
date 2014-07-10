@@ -10,15 +10,18 @@
 (# include the handlebars file for the view. #)
 {% include "web_emitter.hbs" %}
 
+(# the third party libs #)
 <script src="static/js/libs/jquery-1.10.2.js"></script>
 <script src="static/js/libs/handlebars-v1.3.0.js"></script>
 <script src="static/js/libs/ember-1.6.0.js"></script>
 <script src="static/js/libs/ember-data-1.0.0-beta.8.js"></script>
 <script src="static/js/libs/ember-localstorage-adaptor.js"></script>
 
+(# the application and message route #)
 <script src="static/js/web-emitter-app.js"></script>
 <script src="static/js/web-emitter-route.js"></script>
 
+(# message model and view definition #)
 <script src="static/js/models/message.js"></script>
 <script src="static/js/views/edit_message_view.js"></script>
 </body>
