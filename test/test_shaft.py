@@ -1,8 +1,8 @@
 from gevent import joinall, sleep, spawn
 import zmq
 
-from utils_of_test import spawn_windmill
-from windmill_test_case import WindmillTestCase
+from .utils_of_test import spawn_windmill
+from .windmill_test_case import WindmillTestCase
 
 from windmills.core import Shaft
 
@@ -17,7 +17,7 @@ class TestShaft(WindmillTestCase):
     def tearDown(self):
         self.zmq_ctx.destroy()
 
-    def test_shaft_base_behavior(self):
+    def _test_shaft_base_behavior(self):
         """A test that simply starts and stops a Shaft instance.
 
         This test is just to ensure that however complex other test scenarios
@@ -66,7 +66,7 @@ class TestShaft(WindmillTestCase):
         # socket, multiple calls maybe required to allow time for connect
         # negotiation between PUB and SUB
         for _ in range(3):
-            cmd_sock.send('kill')
+            cmd_sock.send_string('kill')
             joinall([the_spawn, ], timeout=0.1)
             if the_spawn.successful():  # if spawn is done running
                 break;                  # exit the message send loop

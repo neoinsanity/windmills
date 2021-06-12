@@ -1,8 +1,8 @@
 from gevent import joinall, sleep
 import zmq.green as zmq
 
-from utils_of_test import spawn_windmill
-from windmill_test_case import WindmillTestCase
+from .utils_of_test import spawn_windmill
+from .windmill_test_case import WindmillTestCase
 
 from windmills.utility_service.cli_emitter import CliEmitter
 

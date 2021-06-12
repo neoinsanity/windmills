@@ -32,9 +32,9 @@ class WebEmitter(Shaft):
         # wsgi server
         self._wsgi_server = None
 
-        print 'pre configure shaft'
+        print('pre configure shaft')
         Shaft.__init__(self, **kwargs)
-        print 'post configure shaft'
+        print('post configure shaft')
 
         self.cargo = self.declare_cargo()
 

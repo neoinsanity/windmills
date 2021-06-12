@@ -1,4 +1,4 @@
-from brick import Brick
+from .brick import Brick
 
 __author__ = 'Raul Gonzalez'
 

@@ -1,7 +1,7 @@
 from logging import DEBUG, INFO, WARNING
 from os import path, remove
 
-from windmill_test_case import WindmillTestCase, TEST_OUT
+from .windmill_test_case import WindmillTestCase, TEST_OUT
 
 from windmills.core import Scaffold
 

@@ -2,8 +2,8 @@ from os import path, remove
 from gevent import joinall, sleep
 import zmq.green as zmq
 
-from utils_of_test import StdOutCapture, spawn_windmill
-from windmill_test_case import WindmillTestCase, TEST_OUT
+from .utils_of_test import spawn_windmill
+from .windmill_test_case import WindmillTestCase, TEST_OUT
 
 from windmills.core.crate import Crate
 from windmills.utility_service import CliListener
@@ -25,7 +25,7 @@ class TestCliListener(WindmillTestCase):
         }
 
     def tearDown(self):
-        for sock in self.sock_map.values():
+        for sock in list(self.sock_map.values()):
             sock.close()
 
         self.zmq_ctx.destroy()
@@ -43,7 +43,7 @@ class TestCliListener(WindmillTestCase):
 
         # test message
         crate = Crate(msg_data='Hola mundo')
-        self.sock_map['PUSH'].send(crate.dump)
+        self.sock_map['PUSH'].send_string(crate.dump)
 
         sleep(0)
         cli_listener.kill()

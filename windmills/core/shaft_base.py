@@ -3,8 +3,8 @@ import signal
 
 import zmq.green as zmq
 
-from scaffold import Scaffold
-from super_core import InputSocketConfig, OutputSocketConfig
+from .scaffold import Scaffold
+from .super_core import InputSocketConfig, OutputSocketConfig
 
 __all__ = ['ShaftBase']
 
@@ -152,11 +152,11 @@ class ShaftConnectionLayer(ShaftRunStateLayer):
 
         if not sock_config.no_block_send:
             self.log.debug('Block sending: %s', msg)
-            sock.send_multipart([msg])
+            sock.send_json([msg])
         else:
             self.log.debug('No Block sending: %s', msg)
             try:
-                sock.send_multipart([msg], zmq.NOBLOCK)
+                sock.send_json([msg], zmq.NOBLOCK)
             except zmq.ZMQError as ze:
                 self.log.exception('ZMQ error detection: %s', ze)
             except Exception as e:
@@ -170,11 +170,11 @@ class ShaftConnectionLayer(ShaftRunStateLayer):
         :param heartbeat:
         :type heartbeat: int
         """
-        print 'run_poll_loop: %s, %s' % (socks_handler_map, heartbeat)
+        print(('run_poll_loop: %s, %s' % (socks_handler_map, heartbeat)))
         while True:
             try:
                 socks = dict(self._poll.poll(timeout=heartbeat * 1000000))
-                for input_sock in socks_handler_map.keys():
+                for input_sock in list(socks_handler_map.keys()):
                     if socks.get(input_sock) == zmq.POLLIN:
                         msg = socks_handler_map[input_sock].recv_handler(
                             input_sock)
@@ -192,7 +192,7 @@ class ShaftConnectionLayer(ShaftRunStateLayer):
                     self.log.info('Stop flag triggered ... shutting down.')
                     break
 
-            except zmq.ZMQError, ze:
+            except zmq.ZMQError as ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions

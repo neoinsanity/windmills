@@ -2,7 +2,7 @@ import re
 
 import zmq.green as zmq
 
-from socket_config import InputSocketConfig, OutputSocketConfig
+from .socket_config import InputSocketConfig, OutputSocketConfig
 
 __author__ = 'Raul Gonzalez'
 
