@@ -192,7 +192,7 @@ class Miller(object):
 
         >>> class Bar(Miller):
         ...   def the_func(self, a_key=None):
-        ...     print 'a_key:', a_key
+        ...     print('a_key:', a_key)
         >>> bar = Bar()
 
         With an instance of a *Miller* child class, we can invoke the method in
@@ -238,7 +238,7 @@ class Miller(object):
         if not src_dict: src_dict = dict()
         assert target
 
-        for name, value in src_dict.items():
+        for name, value in list(src_dict.items()):
             setattr(target, name, value)
 
 

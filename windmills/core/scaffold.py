@@ -165,7 +165,7 @@ from logging.handlers import WatchedFileHandler
 import os
 import shlex
 
-from miller import Miller
+from .miller import Miller
 
 __author__ = 'Raul Gonzalez'
 
@@ -284,7 +284,7 @@ class Scaffold(Miller):
         #: The log attribute to use for logging message
         self.log = None
         # helper to allow using string for configuration
-        if argv is not None and isinstance(argv, basestring):
+        if argv is not None and isinstance(argv, str):
             argv = shlex.split(argv)  # convert string to args style list
 
         # determine if a name has been set for the instantiating class instance

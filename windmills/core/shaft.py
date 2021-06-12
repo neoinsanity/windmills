@@ -1,19 +1,18 @@
 import argparse
 from random import randint
 import signal
-from sys import maxint
+from sys import maxsize
 
 from gevent import joinall, sleep, spawn
 import zmq.green as zmq
 
-from super_core import (ConnectionManager, DeliveryHandler,
-                        InputSocketConfig, OutputSocketConfig)
-from super_core import DEFAULT_INPUT_OPTIONS, DEFAULT_OUTPUT_OPTIONS
-from blade import Blade
-from brick import Brick
-from cargo import Cargo
-from cornerstone import Cornerstone
-from shaft_base import ShaftBase
+from .super_core import DeliveryHandler
+from .super_core import DEFAULT_INPUT_OPTIONS, DEFAULT_OUTPUT_OPTIONS
+from .blade import Blade
+from .brick import Brick
+from .cargo import Cargo
+from .cornerstone import Cornerstone
+from .shaft_base import ShaftBase
 
 __all__ = ['Shaft']
 
@@ -87,7 +86,7 @@ class Shaft(ShaftBase):
 
 
         # abstract handle to allow cargo instance to deliver a message
-        delivery_key = randint(-maxint - 1, maxint)
+        delivery_key = randint(-maxsize - 1, maxsize)
         delivery_handler = DeliveryHandler(delivery_key=delivery_key,
                                            send_func=self.send_crate)
 
@@ -110,7 +109,7 @@ class Shaft(ShaftBase):
         self.log.info('Beginning run() with configuration: %s', self)
         # initialize the input sockets
         socks_handler_map = dict()
-        for blade in self._blades.keys():
+        for blade in list(self._blades.keys()):
             blade_sock, socket_config = self._blades[blade]
             self.log.debug('Initialize socket: %s', socket_config)
             self._poll.register(blade_sock, zmq.POLLIN)
@@ -121,7 +120,7 @@ class Shaft(ShaftBase):
         # of course this is when a command configuration layer get's added
         controller = self._zmq_ctx.socket(zmq.SUB)
         controller.connect('tcp://localhost:54749')
-        controller.setsockopt(zmq.SUBSCRIBE, '')
+        controller.setsockopt_string(zmq.SUBSCRIBE, '')
         self._control_sock = controller
         self._poll.register(self._control_sock, zmq.POLLIN)
         self.log.info('Configured cmd socket')
@@ -148,10 +147,10 @@ class Shaft(ShaftBase):
 
         # close the sockets held by the poller
         self._control_sock.close()
-        for sock in socks_handler_map.keys():
+        for sock in list(socks_handler_map.keys()):
             sock.close()
 
-        for sock, socket_config in self._cargos.values():
+        for sock, socket_config in list(self._cargos.values()):
             sock.close()
 
         self.log.info('Run terminated for %s', self.app_name)
@@ -172,7 +171,7 @@ class Shaft(ShaftBase):
             try:
                 socks = dict(self._poll.poll(timeout=self.heartbeat * 1000))
 
-                for input_sock in socks_handler_map.keys():
+                for input_sock in list(socks_handler_map.keys()):
                     if socks.get(input_sock) == zmq.POLLIN:
                         msg = socks_handler_map[input_sock].recv_handler(
                             input_sock)
@@ -192,7 +191,7 @@ class Shaft(ShaftBase):
 
                 sleep(0)  # yield to give other spawns a chance to execute
 
-            except zmq.ZMQError, ze:
+            except zmq.ZMQError as ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions

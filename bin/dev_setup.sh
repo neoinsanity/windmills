@@ -2,21 +2,24 @@
 
 ###########################################################
 ##### Create virtualenv for development.
-# Virtaulenv needs to be install for this to work.
+# Virtaulenv needs to be installed for this to work.
 # If you don't have virtualenv installed please visit
 # https://pypi.python.org/pypi/virtualenv
 # for instructions on installing virutalenv.
 ###########################################################
 
-# Create the virtual environment
-virtualenv venv
+### Create the virtual environment.
+# The virtualenv will attempt to make python 3
+# environment. If the '-p python3' doesn't work, them most
+# likely there is no python3 installed on local system.
+virtualenv -p python3 venv
 
 echo
 echo "------------------------------------------------"
 echo "- Virtual environment created in directory 'venv'"
 echo "------------------------------------------------"
 
-# Activate the virtual environment
+# Activate the virtual environment.
 echo
 echo "------------------------------------------------"
 echo "----- Activating virtual env with command. -----"

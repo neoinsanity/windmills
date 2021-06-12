@@ -1,6 +1,6 @@
 from  gevent import spawn
 import json
-from crate import Crate
+from .crate import Crate
 
 __author__ = 'Raul Gonzalez'
 

@@ -22,8 +22,8 @@ ZMQ_OUTPUT_SOCKET_TYPE = {
 }
 
 ZMQ_SOCKET_TYPES = dict()
-ZMQ_SOCKET_TYPES.update(ZMQ_INPUT_SOCKET_TYPE.items())
-ZMQ_SOCKET_TYPES.update(ZMQ_OUTPUT_SOCKET_TYPE.items())
+ZMQ_SOCKET_TYPES.update(list(ZMQ_INPUT_SOCKET_TYPE.items()))
+ZMQ_SOCKET_TYPES.update(list(ZMQ_OUTPUT_SOCKET_TYPE.items()))
 
 DEFAULT_INPUT_OPTIONS = {
     'url': 'tcp://localhost:60053',
@@ -47,7 +47,7 @@ DEFAULT_OUTPUT_OPTIONS = {
 
 class SocketConfig(Model):
     url = StringType(required=True)
-    sock_type = StringType(choices=ZMQ_SOCKET_TYPES.keys(), required=True)
+    sock_type = StringType(choices=list(ZMQ_SOCKET_TYPES.keys()), required=True)
     sock_filter = StringType(default='')
     sock_bind = BooleanType(default=False, required=False)
     linger = IntType(default=0, required=False)
@@ -60,8 +60,8 @@ class SocketConfig(Model):
 
 
 class InputSocketConfig(SocketConfig):
-    sock_type = StringType(choices=ZMQ_INPUT_SOCKET_TYPE.keys(), required=True)
+    sock_type = StringType(choices=list(ZMQ_INPUT_SOCKET_TYPE.keys()), required=True)
 
 
 class OutputSocketConfig(SocketConfig):
-    sock_type = StringType(choices=ZMQ_OUTPUT_SOCKET_TYPE.keys(), required=True)
+    sock_type = StringType(choices=list(ZMQ_OUTPUT_SOCKET_TYPE.keys()), required=True)

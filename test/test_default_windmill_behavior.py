@@ -1,7 +1,7 @@
 from gevent import joinall, sleep
 import zmq.green as zmq
-from utils_of_test import spawn_windmill, StdOutCapture
-from windmill_test_case import WindmillTestCase
+from .utils_of_test import spawn_windmill, StdOutCapture
+from .windmill_test_case import WindmillTestCase
 
 from windmills.core import Crate
 from windmills.utility_service import CliEmitter, CliListener
@@ -32,7 +32,7 @@ class TestCliListener(WindmillTestCase):
 
                 # test message
                 crate = Crate(msg_data='hola')
-                push_sock.send(crate.dump)
+                push_sock.send_string(crate.dump)
 
                 # wait on the message delivery
                 joinall([the_spawn, ], timeout=0.1)
