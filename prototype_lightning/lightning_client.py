@@ -18,7 +18,7 @@ com_buildings = [
 ]
 
 #  Do 10 requests, waiting each time for a response
-for count in range(1000):
+for count in range(100):
     print(count)
     for request in com_buildings:
         print(f"Sending request {request} ...")
