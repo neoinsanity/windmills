@@ -45,4 +45,4 @@ while True:
     obj = json.loads(message)
     # print(obj)
 
-    spawn(get_distance_with_geopandas, obj, airports, logger_sender_socket)
+    spawn(get_distance_with_geopy, obj, airports, logger_sender_socket)
