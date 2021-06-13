@@ -1,16 +1,15 @@
 #
-#   Hello World client in Python
-#   Connects REQ socket to tcp://localhost:5555
-#   Sends "Hello" to server, expects "World" back
-#
+#   Send the objects (comercial buildings in our prototype) through the pipes.
+#   The pipe could go through airport listener, resi listener, etc.
 
 import zmq
+import json
 
 context = zmq.Context()
 
 #  Socket to talk to server
-print("Connecting to hello world server...")
-socket = context.socket(zmq.REQ)
+print("Connecting to lightning server...")
+socket = context.socket(zmq.PUSH)
 socket.connect("ipc:///tmp/test.pipe")
 
 com_buildings = [
@@ -19,10 +18,8 @@ com_buildings = [
 ]
 
 #  Do 10 requests, waiting each time for a response
-for request in range(10):
-    print(f"Sending request {request} ...")
-    socket.send_string("Hello")
-
-    #  Get the reply.
-    message = socket.recv()
-    print(f"Received reply {request} [ {message} ]")
+for count in range(1000):
+    print(count)
+    for request in com_buildings:
+        print(f"Sending request {request} ...")
+        socket.send_string(json.dumps(request))
