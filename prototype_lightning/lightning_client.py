@@ -13,7 +13,7 @@ socket = context.socket(zmq.PUSH)
 socket.connect("ipc:///tmp/test.pipe")
 
 com_buildings = [
-    {"id": 1, "lat": 37.3376839, "lon": -121.8370821, "name": "Andu"},
+    {"id": 1, "lat": 37.3376839, "lon": -121.8370821, "name": "A random location in San Jose"},
     {"id": 2, "lat": 37.45120771293968, "lon": -122.18680756130705, "name": "1C"},
 ]
 
