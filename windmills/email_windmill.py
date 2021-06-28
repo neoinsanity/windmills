@@ -7,7 +7,6 @@ from smtplib import SMTP, SMTPAuthenticationError, SMTPServerDisconnected
 from windmills.lib import Brick
 import json
 import os
-import schematics.base
 import socket
 import sys
 
@@ -69,7 +68,9 @@ class EmailWindmill(Brick):
             validator = EmailRequest(**payload)
             try:
                 validator.validate(validate_all=True)
-            except schematics.base.ModelException as e:
+            # TODO Raul: get rid of the schematics
+            # except schematics.base.ModelException as e:
+            except Exception as e:
                 self.log.error('schematics.base.ModelException: %s, while processing %s',
                                e, payload)
                 return
