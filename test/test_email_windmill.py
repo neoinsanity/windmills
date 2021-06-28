@@ -29,7 +29,7 @@ class TestEmailWindmill(WindmillTestCase):
 
 
     def tearDown(self):
-        for sock in self.sock_map.values():
+        for sock in list(self.sock_map.values()):
             sock.close()
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Scaffold
+from .lib import Scaffold
 import sys
 from zmq import DEALER, POLLIN, RCVMORE, ROUTER, SNDMORE, ZMQError
 
@@ -90,7 +90,7 @@ class RouterDealerWindmill(Scaffold):
                         back_end_loop += 1
                         self.log.info('r:%s-%s', back_end_loop, msg)
 
-            except ZMQError, ze:
+            except ZMQError as ze:
                 if ze.errno == 4: # known exception due to keyboard ctrl+c
                     self.log.info('System interrupt detected.')
                 else: # exit hard on unhandled exception

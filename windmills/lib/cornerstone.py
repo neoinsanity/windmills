@@ -10,7 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from scaffold import Scaffold
+from .scaffold import Scaffold
 import signal
 import sys
 from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE,
@@ -300,7 +300,7 @@ class Cornerstone(Scaffold):
                     self.log.info('Stop flag triggered ... shutting down.')
                     break
 
-            except ZMQError, ze:
+            except ZMQError as ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions

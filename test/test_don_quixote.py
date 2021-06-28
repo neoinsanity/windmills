@@ -74,8 +74,8 @@ class TestDonQuixote(WindmillTestCase):
         # The lack of flie or blueprints argument should raise and exception.
         try:
             don = DonQuixote(disable_keyboard=True)
-        except ValueError, e:
-            self.assertEquals(e.message,
+        except ValueError as e:
+            self.assertEqual(e.message,
                               'A blueprint dictionary or file with blueprint '
                               'must be provided.')
             return
