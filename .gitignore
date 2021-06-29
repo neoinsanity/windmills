@@ -1,9 +1,8 @@
-.DS_Store
-venv/
-test_out/
-*._output
-cover_html/
-.coverage
-.idea
 *.pyc
-build/
+venv/
+windmills.egg-info
+.coverage
+COVERAGE_REPORT/
+TEST_OUT/
+.idea/
+.DS_Store

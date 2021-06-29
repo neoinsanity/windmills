@@ -1,3 +1,6 @@
-__all__ = ['WindmillTestCase']
+# Need to insure that gevent monkey patching for supported libraries.
+from gevent import monkey
 
-from windmill_test_case import WindmillTestCase
+monkey.patch_all()
+
+__author__ = 'Raul Gonzalez'

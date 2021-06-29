@@ -1,107 +1,59 @@
-import os
-import time
-from test.utils_of_test import (gen_archive_output_pair,
-                                thread_wrap_windmill)
-from test.windmill_test_case import WindmillTestCase
-from zmq import Context, PUB, PUSH
+from os import path, remove
+from gevent import joinall, sleep
+import zmq.green as zmq
 
+from .utils_of_test import spawn_windmill
+from .windmill_test_case import WindmillTestCase, TEST_OUT
 
-__author__ = 'neoinsanity'
+from windmills.core.crate import Crate
+from windmills.utility_service import CliListener
+
+__author__ = 'Raul Gonzalez'
 
 
 class TestCliListener(WindmillTestCase):
     def setUp(self):
-        self.zmq_ctx = Context()
-        push_out_sock = self.zmq_ctx.socket(PUSH)
-        push_out_sock.bind('tcp://*:6678')
-        pub_out_sock = self.zmq_ctx.socket(PUB)
-        pub_out_sock.bind('tcp://*:6679')
+        self.zmq_ctx = zmq.Context()
+        push_out_sock = self.zmq_ctx.socket(zmq.PUSH)
+        push_out_sock.bind('tcp://*:60053')
+        pub_out_sock = self.zmq_ctx.socket(zmq.PUB)
+        pub_out_sock.bind('tcp://*:8332')
 
         self.sock_map = {
             'PUSH': push_out_sock,
             'PUB': pub_out_sock
         }
 
-        d = 'test_out'
-        if not os.path.exists(d):
-            os.makedirs(d)
-
-
     def tearDown(self):
-        for sock in self.sock_map.values():
+        for sock in list(self.sock_map.values()):
             sock.close()
 
+        self.zmq_ctx.destroy()
 
-    def test_cli_listener_default_behavior(self):
-        t = thread_wrap_windmill('CliListener')
-        try:
-            t.start()
-            self.assertTrue(t.is_alive(),
-                            'The CliEmitter instance should have started.')
-            self.sock_map['PUSH'].send('Hello')
-            time.sleep(1)
-        finally:
-            t.windmill.kill()
-            t.join(3)
-            self.assertFalse(t.is_alive(),
-                             'The CliEmitter instance should have shut down.')
+    def test_file_output(self):
 
+        # ensure the file does not exist, to prevent false positives
+        file_path = path.join(TEST_OUT, 'test_cli_listener_file_output.out')
+        if path.exists(file_path):
+            remove(file_path)
 
-    def test_cli_listener_file_option(self):
-        archive_file, output_file = gen_archive_output_pair(
-            'cli_listener_file_option')
+        # create the test subject
+        argv = '--f ' + file_path
+        the_spawn, cli_listener = spawn_windmill(CliListener, argv=argv)
 
-        args = ['-f', output_file]
-        self._deliver_the_message('Goodbye, Yesterday', args)
+        # test message
+        crate = Crate(msg_data='Hola mundo')
+        self.sock_map['PUSH'].send_string(crate.dump)
 
-        self.assertFiles(archive_file, output_file)
+        sleep(0)
+        cli_listener.kill()
 
+        # wait on the message delivery
+        joinall([the_spawn, ], timeout=1)
+        self.assertIsNone(the_spawn.exception)
+        self.assertTrue(cli_listener.is_stopped())
 
-    def test_cli_socket_type_option(self):
-        archive_file, output_file = gen_archive_output_pair(
-            'cli_socket_type_option')
-
-        args = ['-f', output_file,
-                '--input_sock_type', 'SUB',
-                '--input_sock_filter', 'cat',
-                '--input_sock_url', 'tcp://localhost:6679']
-
-        self._deliver_the_messages(['throw away\n',
-                                    'dog house\n',
-                                    'cat people\n',
-                                    'dog nap\n',
-                                    'cat scratch\n'],
-                                   args, 'PUB')
-
-        self.assertFiles(archive_file, output_file)
-
-
-    def _deliver_the_messages(self, msgs=[], args=list(), sock_type='PUSH'):
-        t = thread_wrap_windmill('CliListener', args)
-        try:
-            t.start()
-            self.assertTrue(t.is_alive())
-            for msg in msgs:
-                self.sock_map[sock_type].send(msg)
-                time.sleep(0.5)
-            time.sleep(1)
-        finally:
-            t.windmill.kill()
-            t.join(3)
-            self.assertFalse(t.is_alive(),
-                             'CliListener instance should have shutdown.')
-
-
-    def _deliver_the_message(self, msg=None, args=list(), sock_type='PUSH'):
-        t = thread_wrap_windmill('CliListener', args)
-        try:
-            t.start()
-            self.assertTrue(t.is_alive())
-            self.sock_map[sock_type].send(msg)
-            time.sleep(1)
-        finally:
-            t.windmill.kill()
-            t.join(3)
-            self.assertFalse(t.is_alive(),
-                             'CliListener instance should have shutdown.')
+        # ensure the message logged to file
+        self.assertTrue(path.exists(file_path),
+                        'The file should exist: %s' % file_path)
 
