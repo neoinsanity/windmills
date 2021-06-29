@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Cornerstone
+from .lib import Cornerstone
 from zmq import   REP
 
 

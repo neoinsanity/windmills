@@ -12,5 +12,5 @@ setup(
     description='This is a set of tools and libraries focused on creating 0mq'
                 ' solutions.',
     packages=['windmills', 'windmills.lib'],
-    requires=['pyzmq','ujson' ],
+    requires=['pyzmq','json' ],
 )

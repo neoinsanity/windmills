@@ -2,12 +2,12 @@
 import argparse
 import signal
 import time
-import ujson
+import json
 from threading import Thread
-from cli_emitter import CliEmitter
-from cli_listener import CliListener
-from echo_service import EchoService
-from ventilator_windmill import VentilatorWindmill
+from .cli_emitter import CliEmitter
+from .cli_listener import CliListener
+from .echo_service import EchoService
+from .ventilator_windmill import VentilatorWindmill
 
 
 __author__ = 'neoinsanity'
@@ -60,12 +60,9 @@ class DonQuixote(object):
         if file is not None:
             blueprints_json = open(file).read()
             if self.verbose:
-                print blueprints_json
-                # todo: raul - the rstrip is a hack, UJSON is aware of the
-                # issue with trailing white space and new lines causing ujson
-                # to crash. Remove rstrip when ujson bug fix is checked in.
+                print(blueprints_json)
             blueprints_json = blueprints_json.rstrip('\n\r')
-            file_blueprints = ujson.loads(blueprints_json)
+            file_blueprints = json.loads(blueprints_json)
             self._load_blueprints(file_blueprints)
         elif blueprints is not None:
             self._load_blueprints(blueprints)
@@ -97,9 +94,9 @@ class DonQuixote(object):
             while(not self._stop):
                 time.sleep(1)
         else:
-            _ = raw_input('Touch me and we die <return>:')
+            _ = input('Touch me and we die <return>:')
 
-        for t_key in thread_service_map.keys():
+        for t_key in list(thread_service_map.keys()):
             service = thread_service_map[t_key]
             service.kill()
             for attempt in range(3):
@@ -107,12 +104,12 @@ class DonQuixote(object):
                 if not t_key.is_alive(): break
 
             if t_key.is_alive():
-                print ('Service', service,
-                       'has not shutdown, will attempt to force')
+                print(('Service', service,
+                       'has not shutdown, will attempt to force'))
                 try:
                     t_key._Thread__stop()
                 except:
-                    print 'Service failed to stop:', service
+                    print('Service failed to stop:', service)
 
 
     def _load_blueprints(self, blueprints=None):

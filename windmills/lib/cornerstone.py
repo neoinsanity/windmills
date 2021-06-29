@@ -10,7 +10,7 @@ Configuration options provided by the Cornerstone class.
         --verbose
             Enable verbose log output. Useful for debugging.
 """
-from scaffold import Scaffold
+from .scaffold import Scaffold
 import signal
 import sys
 from zmq import (Context, NOBLOCK, Poller, POLLIN, RCVMORE, SNDMORE,
@@ -57,7 +57,7 @@ class Cornerstone(Scaffold):
     >>> ctx = foo.zmq_ctx
     >>> sock = ctx.socket(SUB)
     >>> sock.connect('tcp://localhost:6670')
-    >>> sock.setsockopt(SUBSCRIBE, "")
+    >>> sock.setsockopt_string(SUBSCRIBE, "")
     >>> foo.register_input_sock(sock)
     >>> t = threading.Thread(target=foo.run)
     >>> t.start()
@@ -169,13 +169,13 @@ class Cornerstone(Scaffold):
         >>> ctx = foo.zmq_ctx
         >>> sock1 = ctx.socket(SUB)
         >>> sock1.connect('tcp://localhost:2880')
-        >>> sock1.setsockopt(SUBSCRIBE, "")
+        >>> sock1.setsockopt_string(SUBSCRIBE, "")
         >>> assert foo._poll.sockets == {}
         >>> foo.register_input_sock(sock1)
         >>> assert foo._poll.sockets.has_key(sock1)
         >>> sock2 = ctx.socket(SUB)
         >>> sock2.connect('tcp://localhost:2881')
-        >>> sock2.setsockopt(SUBSCRIBE, "")
+        >>> sock2.setsockopt_string(SUBSCRIBE, "")
         >>> foo.register_input_sock(sock2)
         >>> assert not foo._poll.sockets.has_key(sock1)
         >>> assert foo._poll.sockets.has_key(sock2)
@@ -234,10 +234,10 @@ class Cornerstone(Scaffold):
             self.log.info('o: %s', msg)
 
         if not self.no_block_send:
-            self._output_sock.send(msg)
+            self._output_sock.send_string(msg)
         else:
             try:
-                self._output_sock.send(msg, NOBLOCK)
+                self._output_sock.send_string(msg, NOBLOCK)
             except:
                 self.log.error("Unexpected error:", sys.exc_info()[0])
 
@@ -267,7 +267,7 @@ class Cornerstone(Scaffold):
         # of course this is when a command configuration layer get's added
         controller = self.zmq_ctx.socket(SUB)
         controller.connect('tcp://localhost:7885')
-        controller.setsockopt(SUBSCRIBE, "")
+        controller.setsockopt_string(SUBSCRIBE, "")
         self._control_sock = controller
         self._poll.register(self._control_sock)
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -300,7 +300,7 @@ class Cornerstone(Scaffold):
                     self.log.info('Stop flag triggered ... shutting down.')
                     break
 
-            except ZMQError, ze:
+            except ZMQError as ze:
                 if ze.errno == 4: # Known exception due to keyboard ctrl+c
                     self.log.info('System interrupt call detected.')
                 else: # exit hard on unhandled exceptions

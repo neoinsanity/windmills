@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Brick
+from .lib import Brick
 import sys
 
 

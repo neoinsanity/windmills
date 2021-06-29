@@ -1,7 +1,7 @@
 """Brick is a mix-in that contains functionality to configure input and
 output sockets for 0mq device and service patterns.
 """
-from cornerstone import Cornerstone
+from .cornerstone import Cornerstone
 from logging import DEBUG
 from zmq import PUB, PULL, PUSH, SUB, SUBSCRIBE
 

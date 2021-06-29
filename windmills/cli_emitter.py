@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib import Brick
+from .lib import Brick
 import sys
 import time
 
@@ -97,7 +97,7 @@ class CliEmitter(Brick):
 
             # give it time to die.
             time.sleep(1)
-        except Exception, e:
+        except Exception as e:
             self.log.error('Unknown Exception: %s', e)
             raise e
         finally:

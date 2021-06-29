@@ -5,7 +5,7 @@ import argparse
 import logging
 import os.path
 from logging import DEBUG, ERROR, INFO, WARN
-from miller import Miller
+from .miller import Miller
 
 
 __author__ = 'neoinsanity'
@@ -81,7 +81,7 @@ class Scaffold(Miller):
         self.verbose = False
 
         # helper to allow using string for configuration
-        if argv is not None and isinstance(argv, basestring):
+        if argv is not None and isinstance(argv, str):
             argv = argv.split() # convert string to args style list
 
         # determine if a name has benn set for the instantiating windmill instance

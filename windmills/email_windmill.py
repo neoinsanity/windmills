@@ -7,7 +7,6 @@ from smtplib import SMTP, SMTPAuthenticationError, SMTPServerDisconnected
 from windmills.lib import Brick
 import json
 import os
-import schematics.base
 import socket
 import sys
 
@@ -69,7 +68,9 @@ class EmailWindmill(Brick):
             validator = EmailRequest(**payload)
             try:
                 validator.validate(validate_all=True)
-            except schematics.base.ModelException, e:
+            # TODO Raul: get rid of the schematics
+            # except schematics.base.ModelException as e:
+            except Exception as e:
                 self.log.error('schematics.base.ModelException: %s, while processing %s',
                                e, payload)
                 return
@@ -90,17 +91,17 @@ class EmailWindmill(Brick):
 
             return request_json
 
-        except AttributeError, e:
+        except AttributeError as e:
             self.log.error('AttributeError: %s, while processing: %s' % (e, request_json))
-        except SMTPAuthenticationError, e:
+        except SMTPAuthenticationError as e:
             self.log.error('SMTPAuthenticationError: %s' % e)
-        except SMTPServerDisconnected, e:
+        except SMTPServerDisconnected as e:
             self.log.error('SMTPServerDisconnected: %s' % e)
-        except socket.error, e:
+        except socket.error as e:
             self.log.error('socket.error: %s' % e)
-        except TypeError, e:
+        except TypeError as e:
             self.log.error('TypeError: %s, while processing: %s' % (e, request_json))
-        except ValueError, e:
+        except ValueError as e:
             self.log.error('ValueError: %s, while processing: %s' % (e, request_json))
         except:
             self.log.error("Unexpected error:", sys.exc_info()[0])
